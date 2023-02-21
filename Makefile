@@ -6,23 +6,24 @@
 #    By: cudoh <cudoh@student.42wolfsburg.de>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/04/30 15:08:09 by cudoh             #+#    #+#              #
-#    Updated: 2023/01/29 19:56:46 by cudoh            ###   ########.fr        #
+#    Updated: 2023/02/21 22:07:27 by cudoh            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 #SRCS:= $(shell ls *.c | grep -v lst | xargs)
 
-SRCS:= sound.c fft_sample.c
+SRCS:= ./src/WavLib.c ./src/TimeLib.c ./src/main.c ./src/FftLib.c \
+	   ./src/PlaySong.c
 OBJS:= $(SRCS:.c=.o)
 
 
-NAME = play
+NAME = wavtest
 
 CC = cc
 #CFLAGS = -Werror -Wall -Wextra -g
 CFLAGS = -g 
-LIBFLAGS_STATIC = -L/usr/lib/x86_64-linux-gnu/ -lSDL2 -lfftw3 -lm
-INCLUDES = -I./ -I/usr/include/SDL2/
+LIBFLAGS_STATIC = -L/usr/lib/x86_64-linux-gnu/  -lfftw3 -lm -lpthread -lrt -lSDL2
+INCLUDES = -I./inc -I/usr/include/SDL2/ -DDEBUG
 
 NAME : all
 all : $(NAME)

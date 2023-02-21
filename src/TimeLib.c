@@ -1,24 +1,19 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   TimeLib.c                                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: cudoh <cudoh@student.42wolfsburg.de>       +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/02/12 16:56:48 by cudoh             #+#    #+#             */
-/*   Updated: 2023/02/17 21:06:19 by cudoh            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+/* ********************************************************************** */
+/*                                                                        */
+/*    VW - EASTER EGG PROJECT                                             */
+/*    42Wolfsburg                                                         */
+/*    2022/2023                                                           */
+/*                                                                        */
+/* ********************************************************************** */
 
 
 
 #include "../inc/TimeLib.h"
 
 
-int TIME_CreateTime(timer_t *xTimerId)
+int TIME_CreateTimer(timer_t *xTimerId, struct sigevent *sigEvent)
 {
-    //signal(SIGALRM, (void(*)()) TimerHandler);
-    return (timer_create(CLOCK_MONOTONIC_RAW, NULL, xTimerId));
+    return (timer_create(CLOCK_REALTIME, sigEvent, xTimerId));
 }
 
 
@@ -37,12 +32,16 @@ int TIME_SetTimer(timer_t *xTimerId, time_t period_ns, int reset)
     
     
      /* arm the interval timer */
-    timespec_ns.it_interval.tv_sec = ((reset == 1)? (period_ns / NSEC_PER_SEC) : 0);
-    timespec_ns.it_interval.tv_nsec = ((reset == 1)? (period_ns % NSEC_PER_SEC) : 0);
+    timespec_ns.it_interval.tv_sec = 
+            ((reset == TIME_TIMER_PERIODIC)? (period_ns / NSEC_PER_SEC) : 0);
+    timespec_ns.it_interval.tv_nsec =
+             ((reset == TIME_TIMER_PERIODIC)? (period_ns % NSEC_PER_SEC) : 0);
     timespec_ns.it_value.tv_sec = (period_ns / NSEC_PER_SEC);
     timespec_ns.it_value.tv_nsec = (period_ns % NSEC_PER_SEC);
+    //printf("time set value : %ld\n" , timespec_ns.it_interval.tv_sec);
     
-    return (timer_settime(*xTimerId, flags, &timespec_ns, NULL));
+    timer_settime(*xTimerId, flags, &timespec_ns, NULL);
+    return (-1);
 }
 
 
@@ -152,3 +151,4 @@ double TIME_GetRuntime(struct timespec *pstTimeStart, t_timeunits unit)
 clock_gettime(MY_CLOCK_TYPE, &current_time_val); current_realtime=realtime(&current_time_val);
         syslog(LOG_CRIT, "S4 5 Hz on core %d for release %llu @ sec=%6.9lf\n", sched_getcpu(), S4Cnt, current_realtime-start_realtime);
 */
+

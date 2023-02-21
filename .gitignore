@@ -1,0 +1,7 @@
+
+*.wav
+wavtest
+playsong
+encore_hex
+extlib/.
+*.o
