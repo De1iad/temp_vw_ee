@@ -131,13 +131,6 @@ int main(void)
             printf("Error! pthread_create.\n");
             return (PLAYSONG_THREAD_CREATE_ERR);
         }
-        int p = fork();
-    {
-        if (p == 0)
-        {
-            playSong("DEBUG");
-        }
-    }
     #endif
 
 
@@ -193,7 +186,7 @@ int main(void)
             // - hook the data to gui car to light up light images on car
         }
         
-        if (u32SigCounter == (21 * 60))
+        if (u32SigCounter == (21 * 206))
         {
             break ;
         }

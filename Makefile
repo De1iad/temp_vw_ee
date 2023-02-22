@@ -6,7 +6,7 @@
 #    By: cudoh <cudoh@student.42wolfsburg.de>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/04/30 15:08:09 by cudoh             #+#    #+#              #
-#    Updated: 2023/02/21 22:07:27 by cudoh            ###   ########.fr        #
+#    Updated: 2023/02/21 23:08:38 by cudoh            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,7 +23,7 @@ CC = cc
 #CFLAGS = -Werror -Wall -Wextra -g
 CFLAGS = -g 
 LIBFLAGS_STATIC = -L/usr/lib/x86_64-linux-gnu/  -lfftw3 -lm -lpthread -lrt -lSDL2
-INCLUDES = -I./inc -I/usr/include/SDL2/ -DDEBUG
+INCLUDES = -I./inc -I/usr/include/SDL2/ 
 
 NAME : all
 all : $(NAME)
