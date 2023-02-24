@@ -17,12 +17,13 @@
 # define WAVLIB_FMT ("WAVE")
 # define WAVLIB_ONE_BYTE (1U)
 # define WAVLIB_BYTE_BITS (8)
-# define WAVLIB_STEREO_SAMPLE_MAX (8)     // Number of Samples for stereo
+# define WAVLIB_STEREO_SAMPLE_MAX (44100)     // Number of Samples for stereo
 # define WAVLIB_MONO_SAMPLE_MAX (16)      // Max number of Samples for Mono
 # define WAVLIB_SOUND_DATA_BYTE_ADDR (44) // Start byte addr of wav Sound data
 # define WAVLIB_CHANNEL_MONO (1)          // Wav file contains only one channel
 # define WAVLIB_CHANNEL_STEREO (2)        // Wav file contains two channel
 
+struct s_car;
 
 typedef enum enWavLibReturnCode
 {
@@ -215,7 +216,7 @@ tenWavLibReturnCode    WAVLIB_LoadSampleFromStreamToBufferChannel(
 tenWavLibReturnCode    WAVLIB_ConvertSampleBufferToFloat(
                                             int16_t *u16BufferHex,
                                             float *BufferFloat,
-                                            uint8_t const u8BufferSize);
+                                            uint16_t const u16BufferSize);
 
 
 
@@ -244,6 +245,18 @@ tenWavLibReturnCode WAVLIB_TransformFloatSample(
                                             tstSampleBufferFloat *BufferFloat,
                                             tstSampleBufferDouble  *BufferFreq,
                                             tstWavReadConfig *ReadConfig);
+
+typedef struct s_wav
+{
+	FILE *wavStream;
+	struct sWavReadConfig wavReadConfig;
+	struct sSampleBufferHex wavSampleBufferHex;
+	struct sSampleBufferFloat wavSampleBufferFloatInp;
+	struct sSampleBufferDouble wavSampleBufferFreq;
+} t_wav;
+
+int transform(struct s_car *car);
+int	transform_loop(struct s_car *car);
 
 
 #endif // WAVLIB

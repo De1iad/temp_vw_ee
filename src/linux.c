@@ -1,22 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main_fft.c                                         :+:      :+:    :+:   */
+/*   linux.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cudoh <cudoh@student.42wolfsburg.de>       +#+  +:+       +#+        */
+/*   By: obibby <obibby@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/02/05 08:22:53 by cudoh             #+#    #+#             */
-/*   Updated: 2023/02/05 08:44:37 by cudoh            ###   ########.fr       */
+/*   Created: 2023/02/18 23:02:22 by obibby            #+#    #+#             */
+/*   Updated: 2023/02/22 19:57:55 by obibby           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "fft_sample.h"
+#include "../inc/car.h"
 
-int main(void)
+void	*make_image(void *mlx)
 {
-    double sample[10] = {2.0, 3.0, 4.0, 6.0, 7.0, 7.0, 7.0, 6.0, 4.0, 3.0};
-    
-    fft_sample_1d(sample, 10);
-    
-    return (0);
+	return (mlx_new_image_alpha(mlx, 960, 782));
 }

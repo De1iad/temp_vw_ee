@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   FftLib.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cudoh <cudoh@student.42wolfsburg.de>       +#+  +:+       +#+        */
+/*   By: obibby <obibby@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/29 14:28:51 by cudoh             #+#    #+#             */
-/*   Updated: 2023/02/21 05:17:59 by cudoh            ###   ########.fr       */
+/*   Updated: 2023/02/24 08:58:20 by obibby           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ void FFTLIB_ComputeMagnitude(double *dDataOutput, fftw_complex *freq, int N)
     for (int x = 0; x < N; x++)
     {
         dDataOutput[x] = (sqrt((freq[x][0] * freq[x][0]) + 
-                              (freq[x][1] * freq[x][1]))) *10;
+                              (freq[x][1] * freq[x][1])));
         //printf("Magnitude %d: %f\n", x, dDataOutput[x]);
         //render_freq_bar((int)magnitude);
     }

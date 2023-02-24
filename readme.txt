@@ -15,3 +15,6 @@ INCLUDES = -I./ -I/usr/include/SDL2/ -I
 
 ## sources
 https://www.youtube.com/watch?v=6IX6873J1Y8&list=PLEETnX-uPtBVpZvp-R2daNfy9k3-L-Q3u&index=3
+
+
+sudo apt-get install libfftw3-dev libfftw3-doc

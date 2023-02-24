@@ -200,19 +200,19 @@ tenWavLibReturnCode    WAVLIB_LoadSampleFromStreamToBuffer(FILE *fWavStream,
 tenWavLibReturnCode    WAVLIB_ConvertSampleBufferToFloat(
                                                    int16_t *u16BufferHex,
                                                    float *BufferFloat,
-                                                   uint8_t const u8BufferSize)
+                                                   uint16_t const u16BufferSize)
 {
     tenWavLibReturnCode tenReturnCode = WAVLIB_ERR_NULL_PTR;
-    uint8_t u8Idx = 0;
+    uint16_t u16Idx = 0;
 
     if (BufferFloat == NULL || (BufferFloat == NULL))
     {
         return (tenReturnCode);
     }
     {
-        for (;u8Idx < u8BufferSize; u8Idx++)
+        for (;u16Idx < u16BufferSize; u16Idx++)
         {
-            BufferFloat[u8Idx] = ((float)(u16BufferHex[u8Idx])) / ((float) INT16_MAX);
+            BufferFloat[u16Idx] = ((float)(u16BufferHex[u16Idx])) / ((float) INT16_MAX);
         }
     }
     return (tenReturnCode);
