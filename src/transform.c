@@ -29,17 +29,17 @@ double **get_averages(tstSampleBufferDouble *sample_freqs)
 	double **averages = calloc(sizeof(double *), 2);
 	int j;
 
-	averages[0] = calloc(sizeof(double), 14);
-	averages[1] = calloc(sizeof(double), 14);
+	averages[0] = calloc(sizeof(double), 15);
+	averages[1] = calloc(sizeof(double), 15);
 	j = 0;
-	for (int i = 0; i < 7980; i++)
+	for (int i = 0; i < 2280; i++)
 	{
 		//mode
-		if (sample_freqs->dStereoL[i] > averages[0][j])
+		if (sample_freqs->dStereoL[i] > averages[0][j]) // with 15 samples if max sample size of 2280 and pools of 152
 			averages[0][j] = sample_freqs->dStereoL[i];
 		if (sample_freqs->dStereoR[i] > averages[1][j])
 			averages[1][j] = sample_freqs->dStereoR[i];
-		if (i == 570 * (j + 1))
+		if (i == 152 * (j + 1))
 			j++;
 		// //average
 		// averages[0][j] += sample_freqs->dStereoL[i];
@@ -47,7 +47,7 @@ double **get_averages(tstSampleBufferDouble *sample_freqs)
 		// if (i == 1575 * (j + 1))
 		// {
 		// 	averages[0][j] /= 1575;
-		// 	averages[1][j] /= 1575; //570 if 7980 total, 1575 if 22050 total
+		// 	averages[1][j] /= 1575; //570 pools if 7980 total, 1575 if 22050 total. Assuming 14 samples.
 		// 	j++;
 		// }
 	}
@@ -57,9 +57,9 @@ double **get_averages(tstSampleBufferDouble *sample_freqs)
 void	set_light_variables(double **averages)
 {
 	for (int i = 0; i < 14; i++)
-		printf("freq range %d-%d: %f\n", i * 570, (i + 1) * 570, averages[0][i]);
+		printf("freq range %d-%d: %f\n", i * 152, (i + 1) * 152, averages[0][i]);
 	// headlights
-	if (averages[0][0] > 1500 || averages[1][0] > 1500)
+	if (averages[0][0] > 2000 && averages[1][0] > 2000)
 	{
 		EasterEggLightsEE.FrontLights = 1;
 	}
@@ -67,75 +67,82 @@ void	set_light_variables(double **averages)
 		EasterEggLightsEE.FrontLights = 0;
 
 	// fog lights
-	if (averages[0][1] > 300)
+	if (averages[0][1] > 400)
 	{
 		EasterEggLightsEE.FogLights = 1;
-		EasterEggLightsEE.FogLightsPWM = 1000 * (averages[0][1] / 30);
+		EasterEggLightsEE.FogLightsPWM = 1000 * (averages[0][1] / 400);
 	}
-	else if (averages[1][1] > 300)
+	else if (averages[1][1] > 400)
 	{
 		EasterEggLightsEE.FogLights = 1;
-		EasterEggLightsEE.FogLightsPWM = 1000 * (averages[1][1] / 30);
+		EasterEggLightsEE.FogLightsPWM = 1000 * (averages[1][1] / 400);
 	}
-	else
+	else if (averages[0][1] < 350 && averages[1][1] < 350)
 		EasterEggLightsEE.FogLights = 0;
 
 	// brake lights
-	if (averages[0][0] > 1500)
+	if (averages[0][0] > 2000)
 	{
 		EasterEggLightsEE.BrakeLights = 1;
-		EasterEggLightsEE.BrakeLightsPWM = 1000 * (averages[0][0] / 30);
+		EasterEggLightsEE.BrakeLightsPWM = 1000 * (averages[0][0] / 2500);
 	}
-	else if (averages[1][0] > 1500)
+	else if (averages[1][0] > 2000)
 	{
 		EasterEggLightsEE.BrakeLights = 1;
-		EasterEggLightsEE.BrakeLightsPWM = 1000 * (averages[1][0] / 30);
+		EasterEggLightsEE.BrakeLightsPWM = 1000 * (averages[1][0] / 2500);
 	}
-	else
+	else if (averages[0][0] < 1700 && averages[1][0] < 1700)
 		EasterEggLightsEE.BrakeLights = 0;
 
 	// reverse lights
 	if (averages[0][1] > 1)
 	{
 		EasterEggLightsEE.ReverseLights = 1;
-		EasterEggLightsEE.ReverseLightsPWM = 1000 * (averages[0][1] / 30);
+		EasterEggLightsEE.ReverseLightsPWM = 1000 * (averages[0][1] / 500);
 	}
 	else if (averages[1][1] > 1)
 	{
 		EasterEggLightsEE.ReverseLights = 1;
-		EasterEggLightsEE.ReverseLightsPWM = 1000 * (averages[1][1] / 30);
+		EasterEggLightsEE.ReverseLightsPWM = 1000 * (averages[1][1] / 500);
 	}
 	else
 		EasterEggLightsEE.ReverseLights = 0;
 	
 	// blink lights
-	if (averages[0][8] > 1)
+	if (averages[0][8] > 100)
 	{
 		EasterEggLightsEE.BlinkLightLeft = 1;
-		EasterEggLightsEE.BlinkLightLeftPWM = 1000 * (averages[0][8] / 30);
-	}
-	else
-		EasterEggLightsEE.BlinkLightLeft = 0;
-	if (averages[1][8] > 1)
-	{
+		EasterEggLightsEE.BlinkLightLeftPWM = 1000 * (averages[0][8] / 100);
 		EasterEggLightsEE.BlinkLightRight = 1;
-		EasterEggLightsEE.BlinkLightRightPWM = 1000 * (averages[1][8] / 30);
+		EasterEggLightsEE.BlinkLightRightPWM = 1000 * (averages[0][8] / 100);
+	}
+	else if (averages[1][8] > 100)
+	{
+		EasterEggLightsEE.BlinkLightLeft = 1;
+		EasterEggLightsEE.BlinkLightLeftPWM = 1000 * (averages[1][8] / 100);
+		EasterEggLightsEE.BlinkLightRight = 1;
+		EasterEggLightsEE.BlinkLightRightPWM = 1000 * (averages[1][8] / 100);
 	}
 	else
+	{
+		EasterEggLightsEE.BlinkLightLeft = 0;
 		EasterEggLightsEE.BlinkLightRight = 0;
+	}
 
 	// parking lights
-	if (averages[0][3] > 1)
+	if (averages[0][3] > 200)
 	{
 		EasterEggLightsEE.ParkingLightLeft = 1;
-		EasterEggLightsEE.ParkingLightLeftPWM = 1000 * (averages[0][3] / 30);
-	}
-	else
-		EasterEggLightsEE.ParkingLightLeft = 0;
-	if (averages[1][3] > 1)
-	{
+		EasterEggLightsEE.ParkingLightLeftPWM = 1000 * (averages[0][3] / 200);
 		EasterEggLightsEE.ParkingLightRight = 1;
-		EasterEggLightsEE.ParkingLightRightPWM = 1000 * (averages[1][3] / 30);
+		EasterEggLightsEE.ParkingLightRightPWM = 1000 * (averages[0][3] / 200);
+	}
+	else if (averages[1][3] > 200)
+	{
+		EasterEggLightsEE.ParkingLightLeft = 1;
+		EasterEggLightsEE.ParkingLightLeftPWM = 1000 * (averages[1][3] / 200);
+		EasterEggLightsEE.ParkingLightRight = 1;
+		EasterEggLightsEE.ParkingLightRightPWM = 1000 * (averages[1][3] / 200);
 	}
 	else
 		EasterEggLightsEE.ParkingLightRight = 0;
@@ -195,8 +202,8 @@ int	transform_loop(t_car *car)
 		// 	EasterEggLightsEE.FrontLightLeft = 1;
 		// EasterEggLightsEE.FrontLightRight = wavSampleBufferFreq.dStereoR[0];
 		// Adjust sample pos to next based on sampling rate
-		car->wav.wavReadConfig.u32FileSeekPosL -= (car->wav.wavReadConfig.u32Offset * (44100 - 4410));
-		car->wav.wavReadConfig.u32FileSeekPosR -= (car->wav.wavReadConfig.u32Offset * (44100 - 4410));
+		car->wav.wavReadConfig.u32FileSeekPosL -= (car->wav.wavReadConfig.u32Offset * (44100 - 2205));
+		car->wav.wavReadConfig.u32FileSeekPosR -= (car->wav.wavReadConfig.u32Offset * (44100 - 2205));
 
 		// - map transform result to lights
 		// - map the brightness to light using sample data (float) - pwm 

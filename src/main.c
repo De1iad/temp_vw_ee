@@ -6,7 +6,7 @@
 /*   By: obibby <obibby@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/27 16:02:37 by obibby            #+#    #+#             */
-/*   Updated: 2023/02/24 20:07:18 by obibby           ###   ########.fr       */
+/*   Updated: 2023/02/24 22:42:29 by obibby           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ void	put_fps(t_car *car)
 int	light_loop(t_car *car)
 {
 	car->current_time = get_time_in_ms();
-	if (car->current_time - car->previous_time >= 100)
+	if (car->current_time - car->previous_time >= 50)
 	{
 		transform_loop(car);
 		//EasterEgg_Cyclic_10ms();
@@ -68,80 +68,80 @@ int ft_free(t_car *car)
 }
 
 // temporary measure for displaying changes in the light and intensity variables.
-int	key_press(int keycode, t_car *car)
-{
-	if (keycode == KEY_ESC)
-		ft_free(car);
-	else if (keycode == KEY_UP)
-	{
-		if (EasterEggLightsEE.ParkingLightLeft)
-			EasterEggLightsEE.ParkingLightLeft = 0;
-		else
-			EasterEggLightsEE.ParkingLightLeft = 1;
-		EasterEggLightsEE.ParkingLightLeftPWM = 500;
-		if (EasterEggLightsEE.ParkingLightRight)
-			EasterEggLightsEE.ParkingLightRight = 0;
-		else
-			EasterEggLightsEE.ParkingLightRight = 1;
-		EasterEggLightsEE.ParkingLightRightPWM = 500;
-	}
-	else if (keycode == KEY_DOWN)
-	{
-		if (EasterEggLightsEE.FrontLights)
-			EasterEggLightsEE.FrontLights = 0;
-		else
-			EasterEggLightsEE.FrontLights = 1;
-	}
-	else if (keycode == KEY_F)
-	{
-		if (EasterEggLightsEE.FogLights)
-			EasterEggLightsEE.FogLights = 0;
-		else
-			EasterEggLightsEE.FogLights = 1;
-		EasterEggLightsEE.FogLightsPWM = 500;
-	}
-	else if (keycode == KEY_Q)
-	{
-		if (EasterEggLightsEE.LicensePlateLight1)
-			EasterEggLightsEE.LicensePlateLight1 = 0;
-		else
-			EasterEggLightsEE.LicensePlateLight1 = 1;
-		EasterEggLightsEE.LicensePlateLight1PWM = 500;
-	}
-	else if (keycode == KEY_W)
-	{
-		if (EasterEggLightsEE.LicensePlateLight2)
-			EasterEggLightsEE.LicensePlateLight2 = 0;
-		else
-			EasterEggLightsEE.LicensePlateLight2 = 1;
-		EasterEggLightsEE.LicensePlateLight2PWM = 500;
-	}
-	else if (keycode == KEY_E)
-	{
-		if (EasterEggLightsEE.LicensePlateLight3)
-			EasterEggLightsEE.LicensePlateLight3 = 0;
-		else
-			EasterEggLightsEE.LicensePlateLight3 = 1;
-		EasterEggLightsEE.LicensePlateLight3PWM = 500;
-	}
-	else if (keycode == KEY_R)
-	{
-		if (EasterEggLightsEE.LicensePlateLight4)
-			EasterEggLightsEE.LicensePlateLight4 = 0;
-		else
-			EasterEggLightsEE.LicensePlateLight4 = 1;
-		EasterEggLightsEE.LicensePlateLight4PWM = 500;
-	}
-	else if (keycode == KEY_T)
-	{
-		if (EasterEggLightsEE.LicensePlateLight5)
-			EasterEggLightsEE.LicensePlateLight5 = 0;
-		else
-			EasterEggLightsEE.LicensePlateLight5 = 1;
-		EasterEggLightsEE.LicensePlateLight5PWM = 500;
-	}
-	return (0);
-}
+// int	key_press(int keycode, t_car *car)
+// {
+// 	if (keycode == KEY_ESC)
+// 		ft_free(car);
+// 	else if (keycode == KEY_UP)
+// 	{
+// 		if (EasterEggLightsEE.ParkingLightLeft)
+// 			EasterEggLightsEE.ParkingLightLeft = 0;
+// 		else
+// 			EasterEggLightsEE.ParkingLightLeft = 1;
+// 		EasterEggLightsEE.ParkingLightLeftPWM = 500;
+// 		if (EasterEggLightsEE.ParkingLightRight)
+// 			EasterEggLightsEE.ParkingLightRight = 0;
+// 		else
+// 			EasterEggLightsEE.ParkingLightRight = 1;
+// 		EasterEggLightsEE.ParkingLightRightPWM = 500;
+// 	}
+// 	else if (keycode == KEY_DOWN)
+// 	{
+// 		if (EasterEggLightsEE.FrontLights)
+// 			EasterEggLightsEE.FrontLights = 0;
+// 		else
+// 			EasterEggLightsEE.FrontLights = 1;
+// 	}
+// 	else if (keycode == KEY_F)
+// 	{
+// 		if (EasterEggLightsEE.FogLights)
+// 			EasterEggLightsEE.FogLights = 0;
+// 		else
+// 			EasterEggLightsEE.FogLights = 1;
+// 		EasterEggLightsEE.FogLightsPWM = 500;
+// 	}
+// 	else if (keycode == KEY_Q)
+// 	{
+// 		if (EasterEggLightsEE.LicensePlateLight1)
+// 			EasterEggLightsEE.LicensePlateLight1 = 0;
+// 		else
+// 			EasterEggLightsEE.LicensePlateLight1 = 1;
+// 		EasterEggLightsEE.LicensePlateLight1PWM = 500;
+// 	}
+// 	else if (keycode == KEY_W)
+// 	{
+// 		if (EasterEggLightsEE.LicensePlateLight2)
+// 			EasterEggLightsEE.LicensePlateLight2 = 0;
+// 		else
+// 			EasterEggLightsEE.LicensePlateLight2 = 1;
+// 		EasterEggLightsEE.LicensePlateLight2PWM = 500;
+// 	}
+// 	else if (keycode == KEY_E)
+// 	{
+// 		if (EasterEggLightsEE.LicensePlateLight3)
+// 			EasterEggLightsEE.LicensePlateLight3 = 0;
+// 		else
+// 			EasterEggLightsEE.LicensePlateLight3 = 1;
+// 		EasterEggLightsEE.LicensePlateLight3PWM = 500;
+// 	}
+// 	else if (keycode == KEY_R)
+// 	{
+// 		if (EasterEggLightsEE.LicensePlateLight4)
+// 			EasterEggLightsEE.LicensePlateLight4 = 0;
+// 		else
+// 			EasterEggLightsEE.LicensePlateLight4 = 1;
+// 		EasterEggLightsEE.LicensePlateLight4PWM = 500;
+// 	}
+// 	else if (keycode == KEY_T)
+// 	{
+// 		if (EasterEggLightsEE.LicensePlateLight5)
+// 			EasterEggLightsEE.LicensePlateLight5 = 0;
+// 		else
+// 			EasterEggLightsEE.LicensePlateLight5 = 1;
+// 		EasterEggLightsEE.LicensePlateLight5PWM = 500;
+// 	}
+// 	return (0);
+// }
 
 int	main()
 {
@@ -163,7 +163,7 @@ int	main()
 	car.alpha_image.addr = mlx_get_data_addr(car.alpha_image.img, &car.alpha_image.bpp, &car.alpha_image.line_size, &car.alpha_image.endian);
 	transform(&car);
 	mlx_hook(car.window, 17, 0, ft_free, &car);
-	mlx_hook(car.window, 2, 1L << 0, key_press, &car);
+	//mlx_hook(car.window, 2, 1L << 0, key_press, &car);
 	mlx_loop_hook(car.mlx, light_loop, &car);
 	mlx_loop(car.mlx);
 }
