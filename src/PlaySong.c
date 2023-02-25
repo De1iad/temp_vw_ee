@@ -24,7 +24,6 @@ void    MyAudioCallBack(void *userData, uint8_t *stream, int streamLength)
 
 void    *playSong(void *args)
 {
-	usleep(50);
 	SDL_Init(SDL_INIT_AUDIO);
 	printf("\nPlaying %s: %s", NAME_SONG, (char *)args);
     

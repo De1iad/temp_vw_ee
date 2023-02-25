@@ -40,7 +40,7 @@ void	put_fps(t_car *car)
 int	light_loop(t_car *car)
 {
 	car->current_time = get_time_in_ms();
-	if (car->current_time - car->previous_time >= 100)
+	if (car->current_time - car->previous_time >= 10)
 	{	
 		//EasterEgg_Cyclic_10ms();
 		brake_lights(car);
@@ -162,6 +162,8 @@ int	main()
 	car.alpha_image.addr = mlx_get_data_addr(car.alpha_image.img, &car.alpha_image.bpp, &car.alpha_image.line_size, &car.alpha_image.endian);
 	transform(&car);
 	fetch_amp_range(&car);
+	fclose(car.wav.wavStream);
+	transform(&car);
 	pthread_create(&trans_thread, NULL, transform_loop, &car);
 	mlx_hook(car.window, 17, 0, ft_free, &car);
 	//mlx_hook(car.window, 2, 1L << 0, key_press, &car);

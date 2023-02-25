@@ -19,14 +19,11 @@
 inputsEE EasterEggLightsEE;
 
 double g_max_amp[8000];
-/* Global variable for the playback sampling timer */
-volatile sig_atomic_t alarm_snooze = 1;
 
-/* function prototype for the timer SIGALARM handler */
-void	SigAlarmHandler(int sig);
 
 void fetch_amp_range(t_car *car)
 {
+	memset(g_max_amp, 0, 8000 * sizeof(double));
     fseek(car->wav.wavStream, 45, SEEK_SET);
 	int total_samples = 0;
     while (total_samples < wavSpec[6].u32SpecData)
@@ -63,13 +60,11 @@ void fetch_amp_range(t_car *car)
 		car->wav.wavReadConfig.u32FileSeekPosR += (car->wav.wavReadConfig.u32Offset * 44100);
 		total_samples += 44100;
 	}
-	fseek(car->wav.wavStream, 45, SEEK_SET);
 	car->wav.wavReadConfig.u32FileSeekPosL = 45;
 	car->wav.wavReadConfig.u32FileSeekPosR = 47;
 	// for (int x=0; x < 150; x++)
 		//printf("freq %d max: %f\n", x, g_max_amp[x]);
 	printf("done\n");
-	WAVLIB_ShowWavSpec(wavSpec);
 	// exit(0);
 }
 
@@ -109,7 +104,8 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs)
 	// 	printf("freq range %d-%d: %f\n", i * 570, (i + 1) * 570, averages[0][i]);
 	// headlights
 	// printf("freq 150 value: %f\n", g_max_amp[150]);
-	if (sample_freqs->dStereoL[93] > g_max_amp[93] / 5 || sample_freqs->dStereoR[93] > g_max_amp[93] / 5)
+	printf("%f / 7 = %f, current freq L: %f, current freq R: %f\n", g_max_amp[93], g_max_amp[93] / 7, sample_freqs->dStereoL[93], sample_freqs->dStereoR[93]);
+	if (sample_freqs->dStereoL[93] > g_max_amp[93] / 7 || sample_freqs->dStereoR[93] > g_max_amp[93] / 7)
 	{
 		EasterEggLightsEE.FrontLights = 1;
 	}
@@ -219,6 +215,7 @@ void	*transform_loop(void *car_void)
 		return (NULL);
 	}
     #endif
+	fseek(car->wav.wavStream, 45, SEEK_SET);
 	previous_time = car->previous_time;    
 	while (1)
 	{  
@@ -226,7 +223,6 @@ void	*transform_loop(void *car_void)
 		change_in_time = current_time - previous_time;
 		if (change_in_time >= 100)
 		{
-			alarm_snooze = 0;
 			//printf("\n-----\n");
 			// u32SigCounter++;
 			// how many lights to turn on - number of samples
@@ -314,14 +310,16 @@ int transform(t_car *car)
     }
 
     /* Load wav file audio specification data */
-    wavReturnCode = WAVLIB_LoadSpecData(car->wav.wavStream, wavSpec);
-    if (wavReturnCode != WAVLIB_SUCCESS)
-    {
-        printf("Error load spec data, %d\n", wavReturnCode);
-        fclose(car->wav.wavStream);
-        return (wavReturnCode);
-    }
-
+	if (!wavSpec[0].u32SpecData)
+	{
+		wavReturnCode = WAVLIB_LoadSpecData(car->wav.wavStream, wavSpec);
+		if (wavReturnCode != WAVLIB_SUCCESS)
+		{
+			printf("Error load spec data, %d\n", wavReturnCode);
+			fclose(car->wav.wavStream);
+			return (wavReturnCode);
+		}
+	}
     /* Display wav file audio specification data */
     WAVLIB_ShowWavSpec(wavSpec);
 
@@ -335,59 +333,60 @@ int transform(t_car *car)
                                         car->wav.wavReadConfig.u8ByteCnt);
 
 
+	return (0);
 
 
     /* Setup alarm signal handler */
-    struct sigaction sa;    
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART | SA_SIGINFO;
-    sa.sa_handler = SigAlarmHandler;
-    if (sigaction (SIGALRM, &sa, NULL) == -1)
-    {
-        printf("Error Sigaction!");
-        return (0);
-    }
+    // struct sigaction sa;    
+    // sigemptyset(&sa.sa_mask);
+    // sa.sa_flags = SA_RESTART | SA_SIGINFO;
+    // sa.sa_handler = SigAlarmHandler;
+    // if (sigaction (SIGALRM, &sa, NULL) == -1)
+    // {
+    //     printf("Error Sigaction!");
+    //     return (0);
+    // }
 
-    /* create timer */
-    uint32_t u32SigCounter = 0; 
-    timer_t xTimerId;
-    struct sigevent sigEvent;
-    sigEvent.sigev_notify = SIGEV_SIGNAL;
-    sigEvent.sigev_signo = SIGALRM;
-    sigEvent.sigev_value.sival_ptr = &xTimerId;
-    if (TIME_CreateTimer(&xTimerId, &sigEvent) == -1)
-    {
-        printf("Error! timer_create");
-        return (-1);
-    }
-    printf("time id: %p\n", xTimerId);
+    // /* create timer */
+    // uint32_t u32SigCounter = 0; 
+    // timer_t xTimerId;
+    // struct sigevent sigEvent;
+    // sigEvent.sigev_notify = SIGEV_SIGNAL;
+    // sigEvent.sigev_signo = SIGALRM;
+    // sigEvent.sigev_value.sival_ptr = &xTimerId;
+    // if (TIME_CreateTimer(&xTimerId, &sigEvent) == -1)
+    // {
+    //     printf("Error! timer_create");
+    //     return (-1);
+    // }
+    // printf("time id: %p\n", xTimerId);
     
 
     /* set a timer - 10msec - 192kbit/sec */
-   time_t xPeriodNs = 1000000000 /21;
-   //if (TIME_SetTimer(&xTimerId, xPeriod, TIME_TIMER_PERIODIC) == -1)
-   int flags;
-    struct itimerspec timespec_ns = {{0, 0}, {0, 0}};
-    flags = 0;      /* the value.it_value is interpreted relative to the clock
-                        value at the time of the call to timer_settime()
-                    */
+//    time_t xPeriodNs = 1000000000 /21;
+//    //if (TIME_SetTimer(&xTimerId, xPeriod, TIME_TIMER_PERIODIC) == -1)
+//    int flags;
+//     struct itimerspec timespec_ns = {{0, 0}, {0, 0}};
+//     flags = 0;      /* the value.it_value is interpreted relative to the clock
+//                         value at the time of the call to timer_settime()
+//                     */
     
     
-     /* arm the interval timer */
-    timespec_ns.it_interval.tv_sec = (xPeriodNs / NSEC_PER_SEC) ;
-    timespec_ns.it_interval.tv_nsec = ( xPeriodNs % NSEC_PER_SEC) ;
-    timespec_ns.it_value.tv_sec = (xPeriodNs / NSEC_PER_SEC);
-    timespec_ns.it_value.tv_nsec = (xPeriodNs % NSEC_PER_SEC);
-   if (timer_settime(xTimerId, flags, &timespec_ns, NULL) == -1)
-   {
-        printf("Error! timer_settime\n");
-        return (-1);
-   }
+//      /* arm the interval timer */
+//     timespec_ns.it_interval.tv_sec = (xPeriodNs / NSEC_PER_SEC) ;
+//     timespec_ns.it_interval.tv_nsec = ( xPeriodNs % NSEC_PER_SEC) ;
+//     timespec_ns.it_value.tv_sec = (xPeriodNs / NSEC_PER_SEC);
+//     timespec_ns.it_value.tv_nsec = (xPeriodNs % NSEC_PER_SEC);
+//    if (timer_settime(xTimerId, flags, &timespec_ns, NULL) == -1)
+//    {
+//         printf("Error! timer_settime\n");
+//         return (-1);
+//    }
 
-   /* store the start time */
-    printf("start time: %lf\n", TIME_GetTime(unit_sec));
-    struct timespec stTimeStart = {0, 0};
-    clock_gettime(CLOCK_MONOTONIC_RAW, &stTimeStart);
+//    /* store the start time */
+//     printf("start time: %lf\n", TIME_GetTime(unit_sec));
+//     struct timespec stTimeStart = {0, 0};
+//     clock_gettime(CLOCK_MONOTONIC_RAW, &stTimeStart);
 
     /* Play sound if DEBUG flag is define */
     // #ifdef DEBUG
@@ -398,7 +397,6 @@ int transform(t_car *car)
     //     }
     // #endif
 
-	return (0);
 
     // #ifdef DEBUG
     //     if (pthread_join(pxThreadPlaySong, NULL) != 0)
@@ -433,14 +431,4 @@ int transform(t_car *car)
     // fclose(wavStream);
     // exit(0);
     // return (0);
-}
-
-
-
-void	SigAlarmHandler(int sig)
-{
-	if (sig == SIGALRM)
-    {
-        alarm_snooze = 1;
-	}
 }
