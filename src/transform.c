@@ -29,25 +29,25 @@ double **get_averages(tstSampleBufferDouble *sample_freqs)
 	double **averages = calloc(sizeof(double *), 2);
 	int j;
 
-	averages[0] = calloc(sizeof(double), 15);
-	averages[1] = calloc(sizeof(double), 15);
+	averages[0] = calloc(sizeof(double), 19);
+	averages[1] = calloc(sizeof(double), 19);
 	j = 0;
-	for (int i = 0; i < 2280; i++)
+	for (int i = 0; i < 7980; i++)
 	{
-		//mode
+		//max
 		if (sample_freqs->dStereoL[i] > averages[0][j]) // with 15 samples if max sample size of 2280 and pools of 152
 			averages[0][j] = sample_freqs->dStereoL[i];
 		if (sample_freqs->dStereoR[i] > averages[1][j])
 			averages[1][j] = sample_freqs->dStereoR[i];
-		if (i == 152 * (j + 1))
+		if (i == 570 * (j + 1))
 			j++;
-		// //average
+		//mean
 		// averages[0][j] += sample_freqs->dStereoL[i];
 		// averages[1][j] += sample_freqs->dStereoR[i];
-		// if (i == 1575 * (j + 1))
+		// if (i == 152 * (j + 1))
 		// {
-		// 	averages[0][j] /= 1575;
-		// 	averages[1][j] /= 1575; //570 pools if 7980 total, 1575 if 22050 total. Assuming 14 samples.
+		// 	averages[0][j] /= 152;
+		// 	averages[1][j] /= 152; //570 pools if 7980 total, 1575 if 22050 total. Assuming 14 samples.
 		// 	j++;
 		// }
 	}
@@ -57,7 +57,7 @@ double **get_averages(tstSampleBufferDouble *sample_freqs)
 void	set_light_variables(double **averages)
 {
 	for (int i = 0; i < 14; i++)
-		printf("freq range %d-%d: %f\n", i * 152, (i + 1) * 152, averages[0][i]);
+		printf("freq range %d-%d: %f\n", i * 570, (i + 1) * 570, averages[0][i]);
 	// headlights
 	if (averages[0][0] > 2000 && averages[1][0] > 2000)
 	{
@@ -109,19 +109,19 @@ void	set_light_variables(double **averages)
 		EasterEggLightsEE.ReverseLights = 0;
 	
 	// blink lights
-	if (averages[0][8] > 100)
+	if (averages[0][8] > 200)
 	{
 		EasterEggLightsEE.BlinkLightLeft = 1;
-		EasterEggLightsEE.BlinkLightLeftPWM = 1000 * (averages[0][8] / 100);
+		EasterEggLightsEE.BlinkLightLeftPWM = 1000 * (averages[0][8] / 500);
 		EasterEggLightsEE.BlinkLightRight = 1;
-		EasterEggLightsEE.BlinkLightRightPWM = 1000 * (averages[0][8] / 100);
+		EasterEggLightsEE.BlinkLightRightPWM = 1000 * (averages[0][8] / 500);
 	}
-	else if (averages[1][8] > 100)
+	else if (averages[1][8] > 200)
 	{
 		EasterEggLightsEE.BlinkLightLeft = 1;
-		EasterEggLightsEE.BlinkLightLeftPWM = 1000 * (averages[1][8] / 100);
+		EasterEggLightsEE.BlinkLightLeftPWM = 1000 * (averages[1][8] / 500);
 		EasterEggLightsEE.BlinkLightRight = 1;
-		EasterEggLightsEE.BlinkLightRightPWM = 1000 * (averages[1][8] / 100);
+		EasterEggLightsEE.BlinkLightRightPWM = 1000 * (averages[1][8] / 500);
 	}
 	else
 	{
@@ -130,86 +130,101 @@ void	set_light_variables(double **averages)
 	}
 
 	// parking lights
-	if (averages[0][3] > 200)
+	if (averages[0][3] > 400)
 	{
 		EasterEggLightsEE.ParkingLightLeft = 1;
-		EasterEggLightsEE.ParkingLightLeftPWM = 1000 * (averages[0][3] / 200);
+		EasterEggLightsEE.ParkingLightLeftPWM = 1000 * (averages[0][3] / 800);
 		EasterEggLightsEE.ParkingLightRight = 1;
-		EasterEggLightsEE.ParkingLightRightPWM = 1000 * (averages[0][3] / 200);
+		EasterEggLightsEE.ParkingLightRightPWM = 1000 * (averages[0][3] / 800);
 	}
-	else if (averages[1][3] > 200)
+	else if (averages[1][3] > 400)
 	{
 		EasterEggLightsEE.ParkingLightLeft = 1;
-		EasterEggLightsEE.ParkingLightLeftPWM = 1000 * (averages[1][3] / 200);
+		EasterEggLightsEE.ParkingLightLeftPWM = 1000 * (averages[1][3] / 800);
 		EasterEggLightsEE.ParkingLightRight = 1;
-		EasterEggLightsEE.ParkingLightRightPWM = 1000 * (averages[1][3] / 200);
+		EasterEggLightsEE.ParkingLightRightPWM = 1000 * (averages[1][3] / 800);
 	}
 	else
+	{
+		EasterEggLightsEE.ParkingLightLeft = 0;
 		EasterEggLightsEE.ParkingLightRight = 0;
+	}
 	free(averages[0]);
 	free(averages[1]);
 	free(averages);
 }
 
-int	transform_loop(t_car *car)
+void	*transform_loop(void *car_void)
 {
-	/* On timer alarm */            
-	if (alarm_snooze == 1)
-	{   
-		alarm_snooze = 0;
-		//printf("\n-----\n");
-		// u32SigCounter++;
-		// how many lights to turn on - number of samples
-		// - load new set of samples to the buffer (hexbuffer)
-		WAVLIB_LoadSampleFromStreamToBuffer(car->wav.wavStream,
-														&car->wav.wavReadConfig, 
+	/* On timer alarm */   
+	t_car *car = car_void;   
+	time_t current_time;
+	time_t previous_time;
+	time_t change_in_time;
+	previous_time = car->previous_time;    
+	while (1)
+	{  
+		current_time = get_time_in_ms();
+		change_in_time = current_time - previous_time;
+		if (change_in_time >= 100)
+		{
+			alarm_snooze = 0;
+			//printf("\n-----\n");
+			// u32SigCounter++;
+			// how many lights to turn on - number of samples
+			// - load new set of samples to the buffer (hexbuffer)
+			WAVLIB_LoadSampleFromStreamToBuffer(car->wav.wavStream,
+															&car->wav.wavReadConfig, 
+															&car->wav.wavSampleBufferHex,
+															wavSpec);
+			// if (wavReturnCode != WAVLIB_SUCCESS)
+			// {
+			// 	//printf("ERROR! >>> LoadSampleFromStreamToBuffer %d\n", wavReturnCode);
+			// }
+			// - update the number of samples remaining
+
+			// - convert sample data to float
+			WAVLIB_ConvertSampleBufferToFloatByChannel(
 														&car->wav.wavSampleBufferHex,
-														wavSpec);
-		// if (wavReturnCode != WAVLIB_SUCCESS)
-		// {
-		// 	//printf("ERROR! >>> LoadSampleFromStreamToBuffer %d\n", wavReturnCode);
-		// }
-		// - update the number of samples remaining
-
-		// - convert sample data to float
-		WAVLIB_ConvertSampleBufferToFloatByChannel(
-													&car->wav.wavSampleBufferHex,
-													&car->wav.wavSampleBufferFloatInp,
-													&car->wav.wavReadConfig);
-		// if (wavReturnCode != WAVLIB_SUCCESS)
-		// {
-		// 	//printf("ERROR! >>> ConvertSampleBufferToFloatByChannel %d\n", wavReturnCode);
-		// }
+														&car->wav.wavSampleBufferFloatInp,
+														&car->wav.wavReadConfig);
+			// if (wavReturnCode != WAVLIB_SUCCESS)
+			// {
+			// 	//printf("ERROR! >>> ConvertSampleBufferToFloatByChannel %d\n", wavReturnCode);
+			// }
 
 
-		// - perform transform - freq 
-		WAVLIB_TransformFloatSample(
-													&car->wav.wavSampleBufferFloatInp,
-													&car->wav.wavSampleBufferFreq,
-													&car->wav.wavReadConfig);
+			// - perform transform - freq 
+			WAVLIB_TransformFloatSample(
+														&car->wav.wavSampleBufferFloatInp,
+														&car->wav.wavSampleBufferFreq,
+														&car->wav.wavReadConfig);
 
-		// show spectrum on terminal
-		// system("clear");
-		// FFTLIB_ShowFreqSpectrum(wavSampleBufferFreq.dStereoL, 16);
-		// FFTLIB_ShowFreqSpectrum(wavSampleBufferFreq.dStereoR, 16);
-		// int enablelightbuff;
-		// for (int i = 0; i < 8; i++)
-		// {
+			// show spectrum on terminal
+			// system("clear");
+			// FFTLIB_ShowFreqSpectrum(wavSampleBufferFreq.dStereoL, 16);
+			// FFTLIB_ShowFreqSpectrum(wavSampleBufferFreq.dStereoR, 16);
+			// int enablelightbuff;
+			// for (int i = 0; i < 8; i++)
+			// {
 
-		// }
-		set_light_variables(get_averages(&car->wav.wavSampleBufferFreq));
-		// if (wavSampleBufferFreq.dStereoL[0] > 0)
-		// 	EasterEggLightsEE.FrontLightLeft = 1;
-		// EasterEggLightsEE.FrontLightRight = wavSampleBufferFreq.dStereoR[0];
-		// Adjust sample pos to next based on sampling rate
-		car->wav.wavReadConfig.u32FileSeekPosL -= (car->wav.wavReadConfig.u32Offset * (44100 - 2205));
-		car->wav.wavReadConfig.u32FileSeekPosR -= (car->wav.wavReadConfig.u32Offset * (44100 - 2205));
+			// }
+			set_light_variables(get_averages(&car->wav.wavSampleBufferFreq));
+			// if (wavSampleBufferFreq.dStereoL[0] > 0)
+			// 	EasterEggLightsEE.FrontLightLeft = 1;
+			// EasterEggLightsEE.FrontLightRight = wavSampleBufferFreq.dStereoR[0];
+			// Adjust sample pos to next based on sampling rate
+			double change_in_pos = 44100 - (change_in_time * 44.1);
+			car->wav.wavReadConfig.u32FileSeekPosL -= (car->wav.wavReadConfig.u32Offset * (change_in_pos));
+			car->wav.wavReadConfig.u32FileSeekPosR -= (car->wav.wavReadConfig.u32Offset * (change_in_pos));
 
-		// - map transform result to lights
-		// - map the brightness to light using sample data (float) - pwm 
-		// - hook the data to gui car to light up light images on car
+			// - map transform result to lights
+			// - map the brightness to light using sample data (float) - pwm 
+			// - hook the data to gui car to light up light images on car
+			previous_time = current_time;
+		}
 	}
-	return (0);
+	return (NULL);
 	
 	// if (u32SigCounter == (21 * 206))
 	// {

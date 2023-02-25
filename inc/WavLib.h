@@ -256,7 +256,8 @@ typedef struct s_wav
 } t_wav;
 
 int transform(struct s_car *car);
-int	transform_loop(struct s_car *car);
+void	*transform_loop(void *car);
+time_t	get_time_in_ms(void);
 
 
 #endif // WAVLIB
