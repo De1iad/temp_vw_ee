@@ -257,6 +257,7 @@ typedef struct s_wav
 
 int transform(struct s_car *car);
 void	*transform_loop(void *car);
+void fetch_amp_range(struct s_car *car);
 time_t	get_time_in_ms(void);
 
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: obibby <obibby@student.42wolfsburg.de>     +#+  +:+       +#+        */
+/*   By: cudoh <cudoh@student.42wolfsburg.de>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/27 16:02:37 by obibby            #+#    #+#             */
-/*   Updated: 2023/02/25 10:19:20 by obibby           ###   ########.fr       */
+/*   Updated: 2023/02/25 11:37:3 by cudoh            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ void	put_fps(t_car *car)
 int	light_loop(t_car *car)
 {
 	car->current_time = get_time_in_ms();
-	if (car->current_time - car->previous_time >= 10)
+	if (car->current_time - car->previous_time >= 100)
 	{	
 		//EasterEgg_Cyclic_10ms();
 		brake_lights(car);
@@ -161,6 +161,7 @@ int	main()
 	car.alpha_image.img = make_image(car.mlx);
 	car.alpha_image.addr = mlx_get_data_addr(car.alpha_image.img, &car.alpha_image.bpp, &car.alpha_image.line_size, &car.alpha_image.endian);
 	transform(&car);
+	fetch_amp_range(&car);
 	pthread_create(&trans_thread, NULL, transform_loop, &car);
 	mlx_hook(car.window, 17, 0, ft_free, &car);
 	//mlx_hook(car.window, 2, 1L << 0, key_press, &car);
