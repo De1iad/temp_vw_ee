@@ -76,14 +76,14 @@ double **get_averages(tstSampleBufferDouble *sample_freqs)
 	averages[0] = calloc(sizeof(double), 19);
 	averages[1] = calloc(sizeof(double), 19);
 	j = 0;
-	for (int i = 0; i < 7980; i++)
+	for (int i = 0; i < 152; i++)
 	{
 		//max
 		if (sample_freqs->dStereoL[i] > averages[0][j]) // with 15 samples if max sample size of 2280 and pools of 152
-			averages[0][j] = sample_freqs->dStereoL[i];
+			averages[0][j] = sample_freqs->dStereoL[i]; // with 19 samples if max sample size of 152 and pools of 8
 		if (sample_freqs->dStereoR[i] > averages[1][j])
 			averages[1][j] = sample_freqs->dStereoR[i];
-		if (i == 570 * (j + 1))
+		if (i == 8 * (j + 1))
 			j++;
 		//mean
 		// averages[0][j] += sample_freqs->dStereoL[i];
@@ -100,11 +100,15 @@ double **get_averages(tstSampleBufferDouble *sample_freqs)
 
 void	set_light_variables(tstSampleBufferDouble *sample_freqs)
 {
-	// for (int i = 0; i < 14; i++)
-	// 	printf("freq range %d-%d: %f\n", i * 570, (i + 1) * 570, averages[0][i]);
+	// double **averages = get_averages(sample_freqs);
+	// for (int i = 0; i < 19; i++)
+	// 	printf("freq range %d-%d: %f\n", i * 8, (i + 1) * 8, averages[0][i]);
+	// free(averages);
 	// headlights
 	// printf("freq 150 value: %f\n", g_max_amp[150]);
-	printf("%f / 7 = %f, current freq L: %f, current freq R: %f\n", g_max_amp[93], g_max_amp[93] / 7, sample_freqs->dStereoL[93], sample_freqs->dStereoR[93]);
+	//printf("%f / 7 = %f, current freq L: %f, current freq R: %f\n", g_max_amp[93], g_max_amp[93] / 7, sample_freqs->dStereoL[93], sample_freqs->dStereoR[93]);
+	for (int i = 40; i < 49; i++)
+		printf("freq %d, left: %f, right: %f\n", i, sample_freqs->dStereoL[i], sample_freqs->dStereoR[i]);
 	if (sample_freqs->dStereoL[93] > g_max_amp[93] / 7 || sample_freqs->dStereoR[93] > g_max_amp[93] / 7)
 	{
 		EasterEggLightsEE.FrontLights = 1;
@@ -112,19 +116,19 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs)
 	else
 		EasterEggLightsEE.FrontLights = 0;
 
-	// fog lights
-	// if (averages[0][1] > 400)
-	// {
-	// 	EasterEggLightsEE.FogLights = 1;
-	// 	EasterEggLightsEE.FogLightsPWM = 1000 * (averages[0][1] / 400);
-	// }
-	// else if (averages[1][1] > 400)
-	// {
-	// 	EasterEggLightsEE.FogLights = 1;
-	// 	EasterEggLightsEE.FogLightsPWM = 1000 * (averages[1][1] / 400);
-	// }
-	// else if (averages[0][1] < 350 && averages[1][1] < 350)
-	// 	EasterEggLightsEE.FogLights = 0;
+	//fog lights
+	if (sample_freqs->dStereoL[44] > g_max_amp[44] / 7)
+	{
+		EasterEggLightsEE.FogLights = 1;
+		EasterEggLightsEE.FogLightsPWM = 1000 * (sample_freqs->dStereoL[44] / g_max_amp[44]);
+	}
+	else if (sample_freqs->dStereoR[44] > g_max_amp[44] / 7)
+	{
+		EasterEggLightsEE.FogLights = 1;
+		EasterEggLightsEE.FogLightsPWM = 1000 * (sample_freqs->dStereoR[44] / g_max_amp[44]);
+	}
+	else
+		EasterEggLightsEE.FogLights = 0;
 
 	// // brake lights
 	// if (averages[0][0] > 2000)
@@ -208,6 +212,7 @@ void	*transform_loop(void *car_void)
 	time_t previous_time;
 	time_t change_in_time;
 	pthread_t               pxThreadPlaySong;
+	printf("%s, %d\n", wavSpec[6].strSpecName, wavSpec[6].u32SpecData);
 	#ifdef DEBUG
 	if (pthread_create(&pxThreadPlaySong, NULL, playSong, "DEBUG") != 0)
 	{
@@ -216,7 +221,7 @@ void	*transform_loop(void *car_void)
 	}
     #endif
 	fseek(car->wav.wavStream, 45, SEEK_SET);
-	previous_time = car->previous_time;    
+	previous_time = get_time_in_ms();    
 	while (1)
 	{  
 		current_time = get_time_in_ms();
