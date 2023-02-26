@@ -20,6 +20,22 @@ inputsEE EasterEggLightsEE;
 
 double g_max_amp[22050];
 
+void	manual_assign_freqs(t_light_freqs *freqs)
+{
+	freqs->Ambient_Lights = 0;
+	freqs->Blink_Lights = 0;
+	freqs->Brake_Lights = 0;
+	freqs->Fog_Lights = 0;
+	freqs->Front_Lights = 0;
+	freqs->License_Light1 = 0;
+	freqs->License_Light2 = 0;
+	freqs->License_Light3 = 0;
+	freqs->License_Light4 = 0;
+	freqs->License_Light5 = 0;
+	freqs->Parking_Lights = 0;
+	freqs->Reverse_Lights = 0;
+}
+
 void	auto_assign_freqs(t_light_freqs *freqs)
 {
 	double	magnitude = 0;
@@ -87,84 +103,6 @@ void	auto_assign_freqs(t_light_freqs *freqs)
 	printf("license lights 3-4: %dhz\n", freqs->License_Light1);
 }
 
-void fetch_amp_range(t_car *car)
-{
-	int return_code = 0;
-	
-	memset(g_max_amp, 0, 22050 * sizeof(double));
-    fseek(car->wav.wavStream, 45, SEEK_SET);
-	//int total_samples = 0;
-    while (return_code != WAVLIB_EOF) //total_samples < wavSpec[6].u32SpecData
-	{
-		return_code = WAVLIB_LoadSampleFromStreamToBuffer(car->wav.wavStream,
-														&car->wav.wavReadConfig, 
-														&car->wav.wavSampleBufferHex,
-														wavSpec);
-
-		// - convert sample data to float
-		WAVLIB_ConvertSampleBufferToFloatByChannel(
-													&car->wav.wavSampleBufferHex,
-													&car->wav.wavSampleBufferFloatInp,
-													&car->wav.wavReadConfig);
-
-
-		// - perform transform - freq 
-		WAVLIB_TransformFloatSample(
-													&car->wav.wavSampleBufferFloatInp,
-													&car->wav.wavSampleBufferFreq,
-													&car->wav.wavReadConfig);
-		for (int x=0; x < 22050; x++)
-		{
-		    if (car->wav.wavSampleBufferFreq.dStereoL[x] > g_max_amp[x])
-		    {
-		        g_max_amp[x] = car->wav.wavSampleBufferFreq.dStereoL[x];
-		    }
-		    if (car->wav.wavSampleBufferFreq.dStereoR[x] > g_max_amp[x])
-		    {
-		        g_max_amp[x] = car->wav.wavSampleBufferFreq.dStereoR[x];
-		    }
-		}
-		car->wav.wavReadConfig.u32FileSeekPosL += (car->wav.wavReadConfig.u32Offset * 44100);
-		car->wav.wavReadConfig.u32FileSeekPosR += (car->wav.wavReadConfig.u32Offset * 44100);
-		//total_samples += 44100;
-	}
-	car->wav.wavReadConfig.u32FileSeekPosL = 45;
-	car->wav.wavReadConfig.u32FileSeekPosR = 47;
-	// for (int x=0; x < 150; x++)
-		//printf("freq %d max: %f\n", x, g_max_amp[x]);
-	printf("done\n");
-	// exit(0);
-}
-
-double **get_averages(tstSampleBufferDouble *sample_freqs)
-{
-	double **averages = calloc(sizeof(double *), 2);
-	int j;
-
-	averages[0] = calloc(sizeof(double), 19);
-	averages[1] = calloc(sizeof(double), 19);
-	j = 0;
-	for (int i = 0; i < 152; i++)
-	{
-		//max
-		if (sample_freqs->dStereoL[i] > averages[0][j]) // with 15 samples if max sample size of 2280 and pools of 152
-			averages[0][j] = sample_freqs->dStereoL[i]; // with 19 samples if max sample size of 152 and pools of 8
-		if (sample_freqs->dStereoR[i] > averages[1][j])
-			averages[1][j] = sample_freqs->dStereoR[i];
-		if (i == 8 * (j + 1))
-			j++;
-		//mean
-		// averages[0][j] += sample_freqs->dStereoL[i];
-		// averages[1][j] += sample_freqs->dStereoR[i];
-		// if (i == 152 * (j + 1))
-		// {
-		// 	averages[0][j] /= 152;
-		// 	averages[1][j] /= 152; //570 pools if 7980 total, 1575 if 22050 total. Assuming 14 samples.
-		// 	j++;
-		// }
-	}
-	return (averages);
-}
 
 void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *freqs)
 {
@@ -172,16 +110,17 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 	// for (int i = 0; i < 19; i++)
 	// 	printf("freq range %d-%d: %f\n", i * 8, (i + 1) * 8, averages[0][i]);
 	// free(averages);
-	// headlights
-	// printf("freq 150 value: %f\n", g_max_amp[150]);
+
 	//printf("%f / 7 = %f, current freq L: %f, current freq R: %f\n", g_max_amp[93], g_max_amp[93] / 7, sample_freqs->dStereoL[93], sample_freqs->dStereoR[93]);
+
 	printf("timestamp: %ld\n", get_time_in_ms());
 	for (int i = 0; i < 22050; i++)
 	{
 		if ((sample_freqs->dStereoL[i] > g_max_amp[i] * 0.5 && sample_freqs->dStereoL[i] > 400) || (sample_freqs->dStereoR[i] > g_max_amp[i] * 0.5 && sample_freqs->dStereoR[i] > 400))
 			printf("freq %d, left: %f, right: %f\n", i, sample_freqs->dStereoL[i], sample_freqs->dStereoR[i]);
 	}
-	//printf("%f\n", sample_freqs->dStereoL[freqs->Front_Lights]);
+
+	// headlights
 	if (sample_freqs->dStereoL[freqs->Front_Lights] > g_max_amp[freqs->Front_Lights] / 5 || sample_freqs->dStereoR[freqs->Front_Lights] > g_max_amp[freqs->Front_Lights] / 5) //old: sample_freqs->dStereoL[93] > g_max_amp[93] / 7 || sample_freqs->dStereoR[93] > g_max_amp[93] / 7
 	{
 		EasterEggLightsEE.FrontLights = 1;
@@ -189,7 +128,7 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 	else
 		EasterEggLightsEE.FrontLights = 0;
 
-	//fog lights
+	// fog lights
 	if (sample_freqs->dStereoL[freqs->Fog_Lights] > g_max_amp[freqs->Fog_Lights] / 7) // old: sample_freqs->dStereoL[44] > g_max_amp[44] / 7
 	{
 		EasterEggLightsEE.FogLights = 1;
@@ -338,14 +277,16 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 }
 
 void	*transform_loop(void *car_void)
-{
-	/* On timer alarm */   
-	t_car *car = car_void;   
-	time_t current_time;
-	time_t previous_time;
-	time_t change_in_time;
-	t_light_freqs freqs;
-	pthread_t               pxThreadPlaySong;
+{   
+	t_car			*car = car_void;   
+	time_t			current_time;
+	time_t			previous_time;
+	time_t			change_in_time;
+	double			change_in_pos;
+	t_light_freqs	freqs;
+	pthread_t		pxThreadPlaySong;
+
+	//manual_assign_freqs(&freqs);
 	auto_assign_freqs(&freqs);
 	#ifdef DEBUG
 	if (pthread_create(&pxThreadPlaySong, NULL, playSong, "DEBUG") != 0)
@@ -361,11 +302,8 @@ void	*transform_loop(void *car_void)
 	{  
 		current_time = get_time_in_ms();
 		change_in_time = current_time - previous_time;
-		if (change_in_time >= 100)
+		if (change_in_time >= 50)
 		{
-			//printf("\n-----\n");
-			// u32SigCounter++;
-			// how many lights to turn on - number of samples
 			// - load new set of samples to the buffer (hexbuffer)
 			WAVLIB_LoadSampleFromStreamToBuffer(car->wav.wavStream,
 															&car->wav.wavReadConfig, 
@@ -398,33 +336,17 @@ void	*transform_loop(void *car_void)
 			// system("clear");
 			// FFTLIB_ShowFreqSpectrum(wavSampleBufferFreq.dStereoL, 16);
 			// FFTLIB_ShowFreqSpectrum(wavSampleBufferFreq.dStereoR, 16);
-			// int enablelightbuff;
-			// for (int i = 0; i < 8; i++)
-			// {
 
-			// }
-			// set_light_variables(get_averages(&car->wav.wavSampleBufferFreq), &car->wav.wavSampleBufferFreq);
 			set_light_variables(&car->wav.wavSampleBufferFreq, &freqs);
-			// if (wavSampleBufferFreq.dStereoL[0] > 0)
-			// 	EasterEggLightsEE.FrontLightLeft = 1;
-			// EasterEggLightsEE.FrontLightRight = wavSampleBufferFreq.dStereoR[0];
-			// Adjust sample pos to next based on sampling rate
-			double change_in_pos = 44100 - (change_in_time * 44.1);
+
+			change_in_pos = 44100 - (change_in_time * 44.1);
 			car->wav.wavReadConfig.u32FileSeekPosL -= (car->wav.wavReadConfig.u32Offset * (change_in_pos));
 			car->wav.wavReadConfig.u32FileSeekPosR -= (car->wav.wavReadConfig.u32Offset * (change_in_pos));
 
-			// - map transform result to lights
-			// - map the brightness to light using sample data (float) - pwm 
-			// - hook the data to gui car to light up light images on car
 			previous_time = current_time;
 		}
 	}
 	return (NULL);
-	
-	// if (u32SigCounter == (21 * 206))
-	// {
-	//     break ;
-	// }
 }
 
 int transform(t_car *car)
@@ -474,101 +396,83 @@ int transform(t_car *car)
 
 
 	return (0);
+}
+
+void fetch_amp_range(t_car *car)
+{
+	int return_code = 0;
+	
+	memset(g_max_amp, 0, 22050 * sizeof(double));
+    fseek(car->wav.wavStream, 45, SEEK_SET);
+	//int total_samples = 0;
+    while (return_code != WAVLIB_EOF) //total_samples < wavSpec[6].u32SpecData
+	{
+		return_code = WAVLIB_LoadSampleFromStreamToBuffer(car->wav.wavStream,
+														&car->wav.wavReadConfig, 
+														&car->wav.wavSampleBufferHex,
+														wavSpec);
+
+		// - convert sample data to float
+		WAVLIB_ConvertSampleBufferToFloatByChannel(
+													&car->wav.wavSampleBufferHex,
+													&car->wav.wavSampleBufferFloatInp,
+													&car->wav.wavReadConfig);
 
 
-    /* Setup alarm signal handler */
-    // struct sigaction sa;    
-    // sigemptyset(&sa.sa_mask);
-    // sa.sa_flags = SA_RESTART | SA_SIGINFO;
-    // sa.sa_handler = SigAlarmHandler;
-    // if (sigaction (SIGALRM, &sa, NULL) == -1)
-    // {
-    //     printf("Error Sigaction!");
-    //     return (0);
-    // }
+		// - perform transform - freq 
+		WAVLIB_TransformFloatSample(
+													&car->wav.wavSampleBufferFloatInp,
+													&car->wav.wavSampleBufferFreq,
+													&car->wav.wavReadConfig);
+		for (int x=0; x < 22050; x++)
+		{
+		    if (car->wav.wavSampleBufferFreq.dStereoL[x] > g_max_amp[x])
+		    {
+		        g_max_amp[x] = car->wav.wavSampleBufferFreq.dStereoL[x];
+		    }
+		    if (car->wav.wavSampleBufferFreq.dStereoR[x] > g_max_amp[x])
+		    {
+		        g_max_amp[x] = car->wav.wavSampleBufferFreq.dStereoR[x];
+		    }
+		}
+		car->wav.wavReadConfig.u32FileSeekPosL += (car->wav.wavReadConfig.u32Offset * 44100);
+		car->wav.wavReadConfig.u32FileSeekPosR += (car->wav.wavReadConfig.u32Offset * 44100);
+		//total_samples += 44100;
+	}
+	car->wav.wavReadConfig.u32FileSeekPosL = 45;
+	car->wav.wavReadConfig.u32FileSeekPosR = 47;
+	// for (int x=0; x < 150; x++)
+		//printf("freq %d max: %f\n", x, g_max_amp[x]);
+	printf("done\n");
+	// exit(0);
+}
 
-    // /* create timer */
-    // uint32_t u32SigCounter = 0; 
-    // timer_t xTimerId;
-    // struct sigevent sigEvent;
-    // sigEvent.sigev_notify = SIGEV_SIGNAL;
-    // sigEvent.sigev_signo = SIGALRM;
-    // sigEvent.sigev_value.sival_ptr = &xTimerId;
-    // if (TIME_CreateTimer(&xTimerId, &sigEvent) == -1)
-    // {
-    //     printf("Error! timer_create");
-    //     return (-1);
-    // }
-    // printf("time id: %p\n", xTimerId);
-    
+double **get_averages(tstSampleBufferDouble *sample_freqs)
+{
+	double **averages = calloc(sizeof(double *), 2);
+	int j;
 
-    /* set a timer - 10msec - 192kbit/sec */
-//    time_t xPeriodNs = 1000000000 /21;
-//    //if (TIME_SetTimer(&xTimerId, xPeriod, TIME_TIMER_PERIODIC) == -1)
-//    int flags;
-//     struct itimerspec timespec_ns = {{0, 0}, {0, 0}};
-//     flags = 0;      /* the value.it_value is interpreted relative to the clock
-//                         value at the time of the call to timer_settime()
-//                     */
-    
-    
-//      /* arm the interval timer */
-//     timespec_ns.it_interval.tv_sec = (xPeriodNs / NSEC_PER_SEC) ;
-//     timespec_ns.it_interval.tv_nsec = ( xPeriodNs % NSEC_PER_SEC) ;
-//     timespec_ns.it_value.tv_sec = (xPeriodNs / NSEC_PER_SEC);
-//     timespec_ns.it_value.tv_nsec = (xPeriodNs % NSEC_PER_SEC);
-//    if (timer_settime(xTimerId, flags, &timespec_ns, NULL) == -1)
-//    {
-//         printf("Error! timer_settime\n");
-//         return (-1);
-//    }
-
-//    /* store the start time */
-//     printf("start time: %lf\n", TIME_GetTime(unit_sec));
-//     struct timespec stTimeStart = {0, 0};
-//     clock_gettime(CLOCK_MONOTONIC_RAW, &stTimeStart);
-
-    /* Play sound if DEBUG flag is define */
-    // #ifdef DEBUG
-    //     if (pthread_create(&pxThreadPlaySong, NULL, playSong, "DEBUG") != 0)
-    //     {
-    //         printf("Error! pthread_create.\n");
-    //         return (PLAYSONG_THREAD_CREATE_ERR);
-    //     }
-    // #endif
-
-
-    // #ifdef DEBUG
-    //     if (pthread_join(pxThreadPlaySong, NULL) != 0)
-    //     {
-    //         printf("Error! pthread_join.\n");
-    //         return (PLAYSONG_THREAD_JOIN_ERR);
-    //     }
-    // #endif
-
-    // // - disable timer if the number of sample to zero
-    // TIME_DisableTimer(&xTimerId);
-    // printf("run time: %lf\n", TIME_GetRuntime(&stTimeStart, unit_sec));
-
-    /* show runtime of program */
-    /*
-    printf("start time: %lf\n", TIME_GetTime(unit_sec));
-    for (int x=0; x<WAVLIB_STEREO_SAMPLE_MAX; x++)
-    {
-        printf("sample: %d -> L[%5d], R[%5d]\n", x+1, wavSampleBufferHex.i16StereoL[x],
-                                                    wavSampleBufferHex.i16StereoR[x]);
-    }
-
-    for (int x=0; x<WAVLIB_STEREO_SAMPLE_MAX; x++)
-    {
-        printf("sample: %d -> L[%10f], R[%10f]\n", x+1, wavSampleBufferFloatInp.f32StereoL[x],
-                                                      wavSampleBufferFloatInp.f32StereoR[x]);
-    }
-    */
-
-    // testing
-    // adding one thread to play the sound while lighting the gui car
-    // fclose(wavStream);
-    // exit(0);
-    // return (0);
+	averages[0] = calloc(sizeof(double), 19);
+	averages[1] = calloc(sizeof(double), 19);
+	j = 0;
+	for (int i = 0; i < 152; i++)
+	{
+		//max
+		if (sample_freqs->dStereoL[i] > averages[0][j]) // with 15 samples if max sample size of 2280 and pools of 152
+			averages[0][j] = sample_freqs->dStereoL[i]; // with 19 samples if max sample size of 152 and pools of 8
+		if (sample_freqs->dStereoR[i] > averages[1][j])
+			averages[1][j] = sample_freqs->dStereoR[i];
+		if (i == 8 * (j + 1))
+			j++;
+		//mean
+		// averages[0][j] += sample_freqs->dStereoL[i];
+		// averages[1][j] += sample_freqs->dStereoR[i];
+		// if (i == 152 * (j + 1))
+		// {
+		// 	averages[0][j] /= 152;
+		// 	averages[1][j] /= 152; //570 pools if 7980 total, 1575 if 22050 total. Assuming 14 samples.
+		// 	j++;
+		// }
+	}
+	return (averages);
 }
