@@ -7,3 +7,4 @@ extlib/.
 *.o
 car_demo
 *.dylib
+.vscode/

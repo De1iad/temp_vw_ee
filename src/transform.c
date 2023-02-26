@@ -54,7 +54,7 @@ void	auto_assign_freqs(t_light_freqs *freqs)
 	}
 	printf("blink lights: %dhz\n", freqs->Blink_Lights);
 	magnitude = 0;
-	for (int i = 10; i < 50; i++)
+	for (int i = 40; i < 50; i++)
 	{
 		if (g_max_amp[i] > magnitude && freqs->Fog_Lights != i)
 		{
@@ -63,6 +63,28 @@ void	auto_assign_freqs(t_light_freqs *freqs)
 		}
 	}
 	printf("ambient lights: %dhz\n", freqs->Ambient_Lights);
+	magnitude = 0;
+	for (int i = 880; i < 900; i++)
+	{
+		if (g_max_amp[i] > magnitude)
+		{
+			freqs->License_Light1 = i;
+			freqs->License_Light2 = i;
+			magnitude = g_max_amp[i];
+		}
+	}
+	printf("license lights 1-2: %dhz\n", freqs->License_Light1);
+	magnitude = 0;
+	for (int i = 2130; i < 2136; i++)
+	{
+		if (g_max_amp[i] > magnitude)
+		{
+			freqs->License_Light3 = i;
+			freqs->License_Light4 = i;
+			magnitude = g_max_amp[i];
+		}
+	}
+	printf("license lights 3-4: %dhz\n", freqs->License_Light1);
 }
 
 void fetch_amp_range(t_car *car)
@@ -156,7 +178,7 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 	printf("timestamp: %ld\n", get_time_in_ms());
 	for (int i = 0; i < 22050; i++)
 	{
-		if (sample_freqs->dStereoL[i] > 1800 || sample_freqs->dStereoR[i] > 1800)
+		if ((sample_freqs->dStereoL[i] > g_max_amp[i] * 0.5 && sample_freqs->dStereoL[i] > 400) || (sample_freqs->dStereoR[i] > g_max_amp[i] * 0.5 && sample_freqs->dStereoR[i] > 400))
 			printf("freq %d, left: %f, right: %f\n", i, sample_freqs->dStereoL[i], sample_freqs->dStereoR[i]);
 	}
 	//printf("%f\n", sample_freqs->dStereoL[freqs->Front_Lights]);
@@ -250,6 +272,50 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 	}
 	else
 		EasterEggLightsEE.AmbientLights = 0;
+	
+	// license lights 1-2
+	if (sample_freqs->dStereoL[freqs->License_Light1] > g_max_amp[freqs->License_Light1] / 5)
+	{
+		EasterEggLightsEE.LicensePlateLight1 = 1;
+		EasterEggLightsEE.LicensePlateLight1PWM = 1000 * (sample_freqs->dStereoL[freqs->License_Light1] / g_max_amp[freqs->License_Light1]);
+		EasterEggLightsEE.LicensePlateLight2 = 1;
+		EasterEggLightsEE.LicensePlateLight2PWM = EasterEggLightsEE.LicensePlateLight1PWM;
+
+	}
+	else if (sample_freqs->dStereoR[freqs->License_Light1] > g_max_amp[freqs->License_Light1] / 5)
+	{
+		EasterEggLightsEE.LicensePlateLight1 = 1;
+		EasterEggLightsEE.LicensePlateLight1PWM = 1000 * (sample_freqs->dStereoR[freqs->License_Light1] / g_max_amp[freqs->License_Light1]);
+		EasterEggLightsEE.LicensePlateLight2 = 1;
+		EasterEggLightsEE.LicensePlateLight2PWM = EasterEggLightsEE.LicensePlateLight1PWM;
+	}
+	else
+	{
+		EasterEggLightsEE.LicensePlateLight1 = 0;
+		EasterEggLightsEE.LicensePlateLight2 = 0;
+	}
+
+	// license lights 3-4
+	if (sample_freqs->dStereoL[freqs->License_Light3] > g_max_amp[freqs->License_Light3] / 5)
+	{
+		EasterEggLightsEE.LicensePlateLight3 = 1;
+		EasterEggLightsEE.LicensePlateLight3PWM = 1000 * (sample_freqs->dStereoL[freqs->License_Light3] / g_max_amp[freqs->License_Light3]);
+		EasterEggLightsEE.LicensePlateLight4 = 1;
+		EasterEggLightsEE.LicensePlateLight4PWM = EasterEggLightsEE.LicensePlateLight3PWM;
+
+	}
+	else if (sample_freqs->dStereoR[freqs->License_Light3] > g_max_amp[freqs->License_Light3] / 5)
+	{
+		EasterEggLightsEE.LicensePlateLight3 = 1;
+		EasterEggLightsEE.LicensePlateLight3PWM = 1000 * (sample_freqs->dStereoR[freqs->License_Light3] / g_max_amp[freqs->License_Light3]);
+		EasterEggLightsEE.LicensePlateLight4 = 1;
+		EasterEggLightsEE.LicensePlateLight4PWM = EasterEggLightsEE.LicensePlateLight3PWM;
+	}
+	else
+	{
+		EasterEggLightsEE.LicensePlateLight3 = 0;
+		EasterEggLightsEE.LicensePlateLight4 = 0;
+	}
 
 	// // reverse lights
 	// if (averages[0][1] > 1)
@@ -280,6 +346,7 @@ void	*transform_loop(void *car_void)
 	time_t change_in_time;
 	t_light_freqs freqs;
 	pthread_t               pxThreadPlaySong;
+	auto_assign_freqs(&freqs);
 	#ifdef DEBUG
 	if (pthread_create(&pxThreadPlaySong, NULL, playSong, "DEBUG") != 0)
 	{
@@ -288,7 +355,6 @@ void	*transform_loop(void *car_void)
 	}
     #endif
 	sleep(1);
-	auto_assign_freqs(&freqs);
 	fseek(car->wav.wavStream, 45, SEEK_SET);
 	previous_time = get_time_in_ms();    
 	while (1)
