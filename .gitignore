@@ -6,3 +6,4 @@ encore_hex
 extlib/.
 *.o
 car_demo
+*.dylib

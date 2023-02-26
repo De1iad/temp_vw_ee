@@ -6,11 +6,11 @@
 /*   By: obibby <obibby@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/12 23:30:08 by obibby            #+#    #+#             */
-/*   Updated: 2023/02/26 00:30:52 by obibby           ###   ########.fr       */
+/*   Updated: 2023/02/26 03:16:08 by obibby           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/car.h"
+#include "../../inc/car.h"
 
 void	left_indicator_front(t_car *car)
 {

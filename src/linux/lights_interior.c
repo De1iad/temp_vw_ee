@@ -6,11 +6,11 @@
 /*   By: obibby <obibby@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 23:37:58 by obibby            #+#    #+#             */
-/*   Updated: 2023/02/25 23:48:57 by obibby           ###   ########.fr       */
+/*   Updated: 2023/02/26 03:16:11 by obibby           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/car.h"
+#include "../../inc/car.h"
 
 void	interior_front(t_car *car)
 {

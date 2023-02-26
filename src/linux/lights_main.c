@@ -6,11 +6,11 @@
 /*   By: obibby <obibby@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/12 23:10:52 by obibby            #+#    #+#             */
-/*   Updated: 2023/02/24 20:09:21 by obibby           ###   ########.fr       */
+/*   Updated: 2023/02/26 03:16:19 by obibby           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/car.h"
+#include "../../inc/car.h"
 
 void	top_right_main(t_car *car)
 {

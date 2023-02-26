@@ -6,11 +6,11 @@
 /*   By: obibby <obibby@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/12 23:28:01 by obibby            #+#    #+#             */
-/*   Updated: 2023/02/22 19:57:38 by obibby           ###   ########.fr       */
+/*   Updated: 2023/02/26 04:26:49 by obibby           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/car.h"
+#include "../../inc/car.h"
 
 void	fog_lights_side_right(t_car *car)
 {
@@ -25,17 +25,17 @@ void	fog_lights_side_right(t_car *car)
 	y_base = 622;
 	if (!EasterEggLightsEE.FogLights)
 	{
-		alpha = 0;
-		if (get_pixel_colour(&car->alpha_image, 330, 153) != colourshift(255 * alpha, 255 * alpha, 255 * alpha, 255 * alpha))
+		alpha = 255;
+		if (get_pixel_colour(&car->alpha_image, 330, 153) != colourshift(alpha, 255, 255, 255))
 			return ;
 	}
 	else
-		alpha = EasterEggLightsEE.FogLightsPWM * 0.0008;
+		alpha = 255 - EasterEggLightsEE.FogLightsPWM * 255 * 0.001;
 	while (++x < 500)
 	{
 		y = y_base - y_length;
 		while (++y < y_base + y_length)
-			put_pixel(&car->alpha_image, x, y, colourshift(255 * alpha, 255 * alpha, 255 * alpha, 255 * alpha));
+			put_pixel(&car->alpha_image, x, y, colourshift(alpha, 255, 255, 255));
 		y_length++;
 	}
 }
@@ -53,17 +53,17 @@ void	fog_lights_side_left(t_car *car)
 	y_base = 473;
 	if (!EasterEggLightsEE.FogLights)
 	{
-		alpha = 0;
-		if (get_pixel_colour(&car->alpha_image, 330, 153) != colourshift(255 * alpha, 255 * alpha, 255 * alpha, 255 * alpha))
+		alpha = 255;
+		if (get_pixel_colour(&car->alpha_image, 99, 473) != colourshift(alpha, 255, 255, 255))
 			return ;
 	}
 	else
-		alpha = EasterEggLightsEE.FogLightsPWM * 0.0008;
+		alpha = 255 - EasterEggLightsEE.FogLightsPWM * 255 * 0.001;
 	while (++x < 128)
 	{
 		y = y_base - y_length;
 		while (++y <  y_base + y_length)
-			put_pixel(&car->alpha_image, x, y, colourshift(255 * alpha, 255 * alpha, 255 * alpha, 255 * alpha));
+			put_pixel(&car->alpha_image, x, y, colourshift(alpha, 255, 255, 255));
 		y_length--;
 	}
 }
@@ -81,17 +81,17 @@ void	fog_lights_front_right(t_car *car)
 	y = 152;
 	if (!EasterEggLightsEE.FogLights)
 	{
-		alpha = 0;
-		if (get_pixel_colour(&car->alpha_image, 330, 153) != colourshift(255 * alpha, 255 * alpha, 255 * alpha, 255 * alpha))
+		alpha = 255;
+		if (get_pixel_colour(&car->alpha_image, 330, 153) != colourshift(alpha, 255, 255, 255))
 			return ;
 	}
 	else
-		alpha = EasterEggLightsEE.FogLightsPWM * 0.0008;
+		alpha = 255 - EasterEggLightsEE.FogLightsPWM * 255 * 0.001;
 	while (++y < 212)
 	{
 		x = x_base - x_length;
 		while (++x < x_base + x_length)
-			put_pixel(&car->alpha_image, x, y, colourshift(255 * alpha, 255 * alpha, 255 * alpha, 255 * alpha));
+			put_pixel(&car->alpha_image, x, y, colourshift(alpha, 255, 255, 255));
 		if (y < 162)
 		{
 			if (y % 2)
@@ -126,17 +126,17 @@ void	fog_lights_front_left(t_car *car)
 	y = 152;
 	if (!EasterEggLightsEE.FogLights)
 	{
-		alpha = 0;
-		if (get_pixel_colour(&car->alpha_image, 126, 153) != colourshift(255 * alpha, 255 * alpha, 255 * alpha, 255 * alpha))
+		alpha = 255;
+		if (get_pixel_colour(&car->alpha_image, 126, 153) != colourshift(alpha, 255, 255, 255))
 			return ;
 	}
 	else
-		alpha = EasterEggLightsEE.FogLightsPWM * 0.0008;
+		alpha = 255 - EasterEggLightsEE.FogLightsPWM * 255 * 0.001;
 	while (++y < 212)
 	{
 		x = x_base - x_length;
 		while (++x < x_base + x_length)
-			put_pixel(&car->alpha_image, x, y, colourshift(255 * alpha, 255 * alpha, 255 * alpha, 255 * alpha));
+			put_pixel(&car->alpha_image, x, y, colourshift(alpha, 255, 255, 255));
 		if (y < 162)
 		{
 			if (y % 2)

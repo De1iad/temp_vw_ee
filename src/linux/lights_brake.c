@@ -6,11 +6,11 @@
 /*   By: obibby <obibby@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/12 23:37:13 by obibby            #+#    #+#             */
-/*   Updated: 2023/02/22 19:57:34 by obibby           ###   ########.fr       */
+/*   Updated: 2023/02/26 03:16:00 by obibby           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/car.h"
+#include "../../inc/car.h"
 
 void	brake_lights_side(t_car *car)
 {

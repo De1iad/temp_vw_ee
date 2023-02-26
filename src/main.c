@@ -40,7 +40,7 @@ void	put_fps(t_car *car)
 int	light_loop(t_car *car)
 {
 	car->current_time = get_time_in_ms();
-	if (car->current_time - car->previous_time >= 10)
+	if (car->current_time - car->previous_time >= 50)
 	{	
 		//EasterEgg_Cyclic_10ms();
 		brake_lights(car);
@@ -56,15 +56,6 @@ int	light_loop(t_car *car)
 		car->previous_time = car->current_time;
 	}
 	return (0);
-}
-
-// frees all allocated memory and exits.
-int ft_free(t_car *car)
-{
-	mlx_destroy_image(car->mlx, car->image.img);
-	mlx_destroy_image(car->mlx, car->alpha_image.img);
-	mlx_destroy_display(car->mlx);
-	exit(0);
 }
 
 // temporary measure for displaying changes in the light and intensity variables.
