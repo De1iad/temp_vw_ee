@@ -14,11 +14,11 @@
 #ifdef DEBUG
 # include "../inc/PlaySong.h"
 #endif
-# define WAVFILE ("./encore.wav")
+# define WAVFILE ("./Quantumania.wav")
 
 inputsEE EasterEggLightsEE;
 
-double g_max_amp[22050];
+//double g_max_amp[22050];
 
 void	manual_assign_freqs(t_light_freqs *freqs)
 {
@@ -36,15 +36,15 @@ void	manual_assign_freqs(t_light_freqs *freqs)
 	freqs->Reverse_Lights = 0;
 }
 
-void	auto_assign_freqs(t_light_freqs *freqs)
+void	auto_assign_freqs(t_light_freqs *freqs, double *max_amp)
 {
 	double	magnitude = 0;
 	for (int i = 80; i < 100; i++)
 	{
-		if (g_max_amp[i] > magnitude)
+		if (max_amp[i] > magnitude)
 		{
 			freqs->Front_Lights = i;
-			magnitude = g_max_amp[i];
+			magnitude = max_amp[i];
 			//break ;
 		}
 	}
@@ -52,59 +52,59 @@ void	auto_assign_freqs(t_light_freqs *freqs)
 	magnitude = 0;
 	for (int i = 10; i < 50; i++)
 	{
-		if (g_max_amp[i] > magnitude)
+		if (max_amp[i] > magnitude)
 		{
 			freqs->Fog_Lights = i;
-			magnitude = g_max_amp[i];
+			magnitude = max_amp[i];
 		}
 	}
 	printf("fog lights: %dhz\n", freqs->Fog_Lights);
 	magnitude = 0;
 	for (int i = 400; i < 700; i++)
 	{
-		if (g_max_amp[i] > magnitude)
+		if (max_amp[i] > magnitude)
 		{
 			freqs->Blink_Lights = i;
-			magnitude = g_max_amp[i];
+			magnitude = max_amp[i];
 		}
 	}
 	printf("blink lights: %dhz\n", freqs->Blink_Lights);
 	magnitude = 0;
 	for (int i = 40; i < 50; i++)
 	{
-		if (g_max_amp[i] > magnitude && freqs->Fog_Lights != i)
+		if (max_amp[i] > magnitude && freqs->Fog_Lights != i)
 		{
 			freqs->Ambient_Lights = i;
-			magnitude = g_max_amp[i];
+			magnitude = max_amp[i];
 		}
 	}
 	printf("ambient lights: %dhz\n", freqs->Ambient_Lights);
 	magnitude = 0;
 	for (int i = 880; i < 900; i++)
 	{
-		if (g_max_amp[i] > magnitude)
+		if (max_amp[i] > magnitude)
 		{
 			freqs->License_Light1 = i;
 			freqs->License_Light2 = i;
-			magnitude = g_max_amp[i];
+			magnitude = max_amp[i];
 		}
 	}
 	printf("license lights 1-2: %dhz\n", freqs->License_Light1);
 	magnitude = 0;
 	for (int i = 2130; i < 2136; i++)
 	{
-		if (g_max_amp[i] > magnitude)
+		if (max_amp[i] > magnitude)
 		{
 			freqs->License_Light3 = i;
 			freqs->License_Light4 = i;
-			magnitude = g_max_amp[i];
+			magnitude = max_amp[i];
 		}
 	}
 	printf("license lights 3-4: %dhz\n", freqs->License_Light1);
 }
 
 
-void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *freqs)
+void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *freqs, double *max_amp)
 {
 	// double **averages = get_averages(sample_freqs);
 	// for (int i = 0; i < 19; i++)
@@ -112,16 +112,15 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 	// free(averages);
 
 	//printf("%f / 7 = %f, current freq L: %f, current freq R: %f\n", g_max_amp[93], g_max_amp[93] / 7, sample_freqs->dStereoL[93], sample_freqs->dStereoR[93]);
-
 	printf("timestamp: %ld\n", get_time_in_ms());
 	for (int i = 0; i < 22050; i++)
 	{
-		if ((sample_freqs->dStereoL[i] > g_max_amp[i] * 0.5 && sample_freqs->dStereoL[i] > 400) || (sample_freqs->dStereoR[i] > g_max_amp[i] * 0.5 && sample_freqs->dStereoR[i] > 400))
-			printf("freq %d, left: %f, right: %f\n", i, sample_freqs->dStereoL[i], sample_freqs->dStereoR[i]);
+		if ((sample_freqs->dStereoL[i] > 400) || (sample_freqs->dStereoR[i] > 400))
+			printf("freq %d, left: %f, right: %f, max_amp: %f\n", i, sample_freqs->dStereoL[i], sample_freqs->dStereoR[i], max_amp[i]);
 	}
 
 	// headlights
-	if (sample_freqs->dStereoL[freqs->Front_Lights] > g_max_amp[freqs->Front_Lights] / 5 || sample_freqs->dStereoR[freqs->Front_Lights] > g_max_amp[freqs->Front_Lights] / 5) //old: sample_freqs->dStereoL[93] > g_max_amp[93] / 7 || sample_freqs->dStereoR[93] > g_max_amp[93] / 7
+	if (sample_freqs->dStereoL[freqs->Front_Lights] > max_amp[freqs->Front_Lights] / 3 || sample_freqs->dStereoR[freqs->Front_Lights] > max_amp[freqs->Front_Lights] / 3) //old: sample_freqs->dStereoL[93] > max_amp[93] / 7 || sample_freqs->dStereoR[93] > max_amp[93] / 7
 	{
 		EasterEggLightsEE.FrontLights = 1;
 	}
@@ -129,33 +128,33 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 		EasterEggLightsEE.FrontLights = 0;
 
 	// fog lights
-	if (sample_freqs->dStereoL[freqs->Fog_Lights] > g_max_amp[freqs->Fog_Lights] / 7) // old: sample_freqs->dStereoL[44] > g_max_amp[44] / 7
+	if (sample_freqs->dStereoL[freqs->Fog_Lights] > max_amp[freqs->Fog_Lights] / 7) // old: sample_freqs->dStereoL[44] > max_amp[44] / 7
 	{
 		EasterEggLightsEE.FogLights = 1;
-		EasterEggLightsEE.FogLightsPWM = 1000 * (sample_freqs->dStereoL[freqs->Fog_Lights] / g_max_amp[freqs->Fog_Lights]);
+		EasterEggLightsEE.FogLightsPWM = 1000 * (sample_freqs->dStereoL[freqs->Fog_Lights] / max_amp[freqs->Fog_Lights]);
 	}
-	else if (sample_freqs->dStereoR[freqs->Fog_Lights] > g_max_amp[freqs->Fog_Lights] / 7)
+	else if (sample_freqs->dStereoR[freqs->Fog_Lights] > max_amp[freqs->Fog_Lights] / 7)
 	{
 		EasterEggLightsEE.FogLights = 1;
-		EasterEggLightsEE.FogLightsPWM = 1000 * (sample_freqs->dStereoR[freqs->Fog_Lights] / g_max_amp[freqs->Fog_Lights]);
+		EasterEggLightsEE.FogLightsPWM = 1000 * (sample_freqs->dStereoR[freqs->Fog_Lights] / max_amp[freqs->Fog_Lights]);
 	}
 	else
 		EasterEggLightsEE.FogLights = 0;
 
 	// parking lights
-	if (sample_freqs->dStereoL[73] > g_max_amp[73] / 7)
+	if (sample_freqs->dStereoL[73] > max_amp[73] / 7)
 	{
 		EasterEggLightsEE.ParkingLightLeft = 1;
-		EasterEggLightsEE.ParkingLightLeftPWM = 1000 * (sample_freqs->dStereoL[73] / g_max_amp[73]);
+		EasterEggLightsEE.ParkingLightLeftPWM = 1000 * (sample_freqs->dStereoL[73] / max_amp[73]);
 		EasterEggLightsEE.ParkingLightRight = 1;
-		EasterEggLightsEE.ParkingLightRightPWM = 1000 * (sample_freqs->dStereoL[73] / g_max_amp[73]);
+		EasterEggLightsEE.ParkingLightRightPWM = 1000 * (sample_freqs->dStereoL[73] / max_amp[73]);
 	}
-	else if (sample_freqs->dStereoR[73] > g_max_amp[73] / 7)
+	else if (sample_freqs->dStereoR[73] > max_amp[73] / 7)
 	{
 		EasterEggLightsEE.ParkingLightLeft = 1;
-		EasterEggLightsEE.ParkingLightLeftPWM = 1000 * (sample_freqs->dStereoR[73] > g_max_amp[73]);
+		EasterEggLightsEE.ParkingLightLeftPWM = 1000 * (sample_freqs->dStereoR[73] > max_amp[73]);
 		EasterEggLightsEE.ParkingLightRight = 1;
-		EasterEggLightsEE.ParkingLightRightPWM = 1000 * (sample_freqs->dStereoR[73] > g_max_amp[73]);
+		EasterEggLightsEE.ParkingLightRightPWM = 1000 * (sample_freqs->dStereoR[73] > max_amp[73]);
 	}
 	else
 	{
@@ -164,19 +163,19 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 	}
 
 	// blink lights
-	if (sample_freqs->dStereoL[freqs->Blink_Lights] > g_max_amp[freqs->Blink_Lights] / 5) // old: sample_freqs->dStereoL[876] > g_max_amp[876] / 7
+	if (sample_freqs->dStereoL[freqs->Blink_Lights] > max_amp[freqs->Blink_Lights] / 5) // old: sample_freqs->dStereoL[876] > max_amp[876] / 7
 	{
 		EasterEggLightsEE.BlinkLightLeft = 1;
-		EasterEggLightsEE.BlinkLightLeftPWM = 1000 * (sample_freqs->dStereoL[freqs->Blink_Lights] / g_max_amp[freqs->Blink_Lights]);
+		EasterEggLightsEE.BlinkLightLeftPWM = 1000 * (sample_freqs->dStereoL[freqs->Blink_Lights] / max_amp[freqs->Blink_Lights]);
 		EasterEggLightsEE.BlinkLightRight = 1;
-		EasterEggLightsEE.BlinkLightRightPWM = 1000 * (sample_freqs->dStereoL[freqs->Blink_Lights] / g_max_amp[freqs->Blink_Lights]);
+		EasterEggLightsEE.BlinkLightRightPWM = 1000 * (sample_freqs->dStereoL[freqs->Blink_Lights] / max_amp[freqs->Blink_Lights]);
 	}
-	else if (sample_freqs->dStereoR[freqs->Blink_Lights] > g_max_amp[freqs->Blink_Lights] / 5)
+	else if (sample_freqs->dStereoR[freqs->Blink_Lights] > max_amp[freqs->Blink_Lights] / 5)
 	{
 		EasterEggLightsEE.BlinkLightLeft = 1;
-		EasterEggLightsEE.BlinkLightLeftPWM = 1000 * (sample_freqs->dStereoR[freqs->Blink_Lights] / g_max_amp[freqs->Blink_Lights]);
+		EasterEggLightsEE.BlinkLightLeftPWM = 1000 * (sample_freqs->dStereoR[freqs->Blink_Lights] / max_amp[freqs->Blink_Lights]);
 		EasterEggLightsEE.BlinkLightRight = 1;
-		EasterEggLightsEE.BlinkLightRightPWM = 1000 * (sample_freqs->dStereoR[freqs->Blink_Lights] / g_max_amp[freqs->Blink_Lights]);
+		EasterEggLightsEE.BlinkLightRightPWM = 1000 * (sample_freqs->dStereoR[freqs->Blink_Lights] / max_amp[freqs->Blink_Lights]);
 	}
 	else
 	{
@@ -185,46 +184,46 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 	}
 
 	// brake lights
-	if (sample_freqs->dStereoL[556] > g_max_amp[556] / 7)
+	if (sample_freqs->dStereoL[556] > max_amp[556] / 7)
 	{
 		EasterEggLightsEE.BrakeLights = 1;
-		EasterEggLightsEE.BrakeLightsPWM = 1000 * (sample_freqs->dStereoL[556] / g_max_amp[556]);
+		EasterEggLightsEE.BrakeLightsPWM = 1000 * (sample_freqs->dStereoL[556] / max_amp[556]);
 	}
-	else if (sample_freqs->dStereoR[1109] > g_max_amp[1109] / 7)
+	else if (sample_freqs->dStereoR[1109] > max_amp[1109] / 7)
 	{
 		EasterEggLightsEE.BrakeLights = 1;
-		EasterEggLightsEE.BrakeLightsPWM = 1000 * (sample_freqs->dStereoR[1109] > g_max_amp[1109]);
+		EasterEggLightsEE.BrakeLightsPWM = 1000 * (sample_freqs->dStereoR[1109] > max_amp[1109]);
 	}
 	else
 		EasterEggLightsEE.BrakeLights = 0;
 
 	// ambient lights
-	if (sample_freqs->dStereoL[freqs->Ambient_Lights] > g_max_amp[freqs->Ambient_Lights] / 5)
+	if (sample_freqs->dStereoL[freqs->Ambient_Lights] > max_amp[freqs->Ambient_Lights] / 5)
 	{
 		EasterEggLightsEE.AmbientLights = 1;
-		EasterEggLightsEE.AmbientLightsPWM = 1000 * (sample_freqs->dStereoL[freqs->Ambient_Lights] / g_max_amp[freqs->Ambient_Lights]);
+		EasterEggLightsEE.AmbientLightsPWM = 1000 * (sample_freqs->dStereoL[freqs->Ambient_Lights] / max_amp[freqs->Ambient_Lights]);
 	}
-	else if (sample_freqs->dStereoR[freqs->Ambient_Lights] > g_max_amp[freqs->Ambient_Lights] / 5)
+	else if (sample_freqs->dStereoR[freqs->Ambient_Lights] > max_amp[freqs->Ambient_Lights] / 5)
 	{
 		EasterEggLightsEE.AmbientLights = 1;
-		EasterEggLightsEE.AmbientLightsPWM = 1000 * (sample_freqs->dStereoR[freqs->Ambient_Lights] > g_max_amp[freqs->Ambient_Lights]);
+		EasterEggLightsEE.AmbientLightsPWM = 1000 * (sample_freqs->dStereoR[freqs->Ambient_Lights] > max_amp[freqs->Ambient_Lights]);
 	}
 	else
 		EasterEggLightsEE.AmbientLights = 0;
 	
 	// license lights 1-2
-	if (sample_freqs->dStereoL[freqs->License_Light1] > g_max_amp[freqs->License_Light1] / 5)
+	if (sample_freqs->dStereoL[freqs->License_Light1] > max_amp[freqs->License_Light1] / 5)
 	{
 		EasterEggLightsEE.LicensePlateLight1 = 1;
-		EasterEggLightsEE.LicensePlateLight1PWM = 1000 * (sample_freqs->dStereoL[freqs->License_Light1] / g_max_amp[freqs->License_Light1]);
+		EasterEggLightsEE.LicensePlateLight1PWM = 1000 * (sample_freqs->dStereoL[freqs->License_Light1] / max_amp[freqs->License_Light1]);
 		EasterEggLightsEE.LicensePlateLight2 = 1;
 		EasterEggLightsEE.LicensePlateLight2PWM = EasterEggLightsEE.LicensePlateLight1PWM;
 
 	}
-	else if (sample_freqs->dStereoR[freqs->License_Light1] > g_max_amp[freqs->License_Light1] / 5)
+	else if (sample_freqs->dStereoR[freqs->License_Light1] > max_amp[freqs->License_Light1] / 5)
 	{
 		EasterEggLightsEE.LicensePlateLight1 = 1;
-		EasterEggLightsEE.LicensePlateLight1PWM = 1000 * (sample_freqs->dStereoR[freqs->License_Light1] / g_max_amp[freqs->License_Light1]);
+		EasterEggLightsEE.LicensePlateLight1PWM = 1000 * (sample_freqs->dStereoR[freqs->License_Light1] / max_amp[freqs->License_Light1]);
 		EasterEggLightsEE.LicensePlateLight2 = 1;
 		EasterEggLightsEE.LicensePlateLight2PWM = EasterEggLightsEE.LicensePlateLight1PWM;
 	}
@@ -235,18 +234,18 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 	}
 
 	// license lights 3-4
-	if (sample_freqs->dStereoL[freqs->License_Light3] > g_max_amp[freqs->License_Light3] / 5)
+	if (sample_freqs->dStereoL[freqs->License_Light3] > max_amp[freqs->License_Light3] / 5)
 	{
 		EasterEggLightsEE.LicensePlateLight3 = 1;
-		EasterEggLightsEE.LicensePlateLight3PWM = 1000 * (sample_freqs->dStereoL[freqs->License_Light3] / g_max_amp[freqs->License_Light3]);
+		EasterEggLightsEE.LicensePlateLight3PWM = 1000 * (sample_freqs->dStereoL[freqs->License_Light3] / max_amp[freqs->License_Light3]);
 		EasterEggLightsEE.LicensePlateLight4 = 1;
 		EasterEggLightsEE.LicensePlateLight4PWM = EasterEggLightsEE.LicensePlateLight3PWM;
 
 	}
-	else if (sample_freqs->dStereoR[freqs->License_Light3] > g_max_amp[freqs->License_Light3] / 5)
+	else if (sample_freqs->dStereoR[freqs->License_Light3] > max_amp[freqs->License_Light3] / 5)
 	{
 		EasterEggLightsEE.LicensePlateLight3 = 1;
-		EasterEggLightsEE.LicensePlateLight3PWM = 1000 * (sample_freqs->dStereoR[freqs->License_Light3] / g_max_amp[freqs->License_Light3]);
+		EasterEggLightsEE.LicensePlateLight3PWM = 1000 * (sample_freqs->dStereoR[freqs->License_Light3] / max_amp[freqs->License_Light3]);
 		EasterEggLightsEE.LicensePlateLight4 = 1;
 		EasterEggLightsEE.LicensePlateLight4PWM = EasterEggLightsEE.LicensePlateLight3PWM;
 	}
@@ -287,7 +286,7 @@ void	*transform_loop(void *car_void)
 	pthread_t		pxThreadPlaySong;
 
 	//manual_assign_freqs(&freqs);
-	auto_assign_freqs(&freqs);
+	auto_assign_freqs(&freqs, car->max_amp);
 	#ifdef DEBUG
 	if (pthread_create(&pxThreadPlaySong, NULL, playSong, "DEBUG") != 0)
 	{
@@ -296,13 +295,13 @@ void	*transform_loop(void *car_void)
 	}
     #endif
 	sleep(1);
-	fseek(car->wav.wavStream, 45, SEEK_SET);
+	fseek(car->wav.wavStream, car->wav.wavReadConfig.u32FileSeekPosL, SEEK_SET);
 	previous_time = get_time_in_ms();    
 	while (1)
 	{  
 		current_time = get_time_in_ms();
 		change_in_time = current_time - previous_time;
-		if (change_in_time >= 50)
+		if (change_in_time >= 100)
 		{
 			// - load new set of samples to the buffer (hexbuffer)
 			WAVLIB_LoadSampleFromStreamToBuffer(car->wav.wavStream,
@@ -337,7 +336,7 @@ void	*transform_loop(void *car_void)
 			// FFTLIB_ShowFreqSpectrum(wavSampleBufferFreq.dStereoL, 16);
 			// FFTLIB_ShowFreqSpectrum(wavSampleBufferFreq.dStereoR, 16);
 
-			set_light_variables(&car->wav.wavSampleBufferFreq, &freqs);
+			set_light_variables(&car->wav.wavSampleBufferFreq, &freqs, car->max_amp);
 
 			change_in_pos = 44100 - (change_in_time * 44.1);
 			car->wav.wavReadConfig.u32FileSeekPosL -= (car->wav.wavReadConfig.u32Offset * (change_in_pos));
@@ -401,12 +400,15 @@ int transform(t_car *car)
 void fetch_amp_range(t_car *car)
 {
 	int return_code = 0;
-	
-	memset(g_max_amp, 0, 22050 * sizeof(double));
-    fseek(car->wav.wavStream, 45, SEEK_SET);
+	long i = 0;
+
+    for (int i = 0; i < 22050; i++)
+		car->max_amp[i] = 0;
+	fseek(car->wav.wavStream, car->wav.wavReadConfig.u32FileSeekPosL, SEEK_SET);
 	//int total_samples = 0;
     while (return_code != WAVLIB_EOF) //total_samples < wavSpec[6].u32SpecData
 	{
+		i++;
 		return_code = WAVLIB_LoadSampleFromStreamToBuffer(car->wav.wavStream,
 														&car->wav.wavReadConfig, 
 														&car->wav.wavSampleBufferHex,
@@ -426,23 +428,24 @@ void fetch_amp_range(t_car *car)
 													&car->wav.wavReadConfig);
 		for (int x=0; x < 22050; x++)
 		{
-		    if (car->wav.wavSampleBufferFreq.dStereoL[x] > g_max_amp[x])
+		    if (car->wav.wavSampleBufferFreq.dStereoL[x] > car->max_amp[x])
 		    {
-		        g_max_amp[x] = car->wav.wavSampleBufferFreq.dStereoL[x];
+		        car->max_amp[x] = car->wav.wavSampleBufferFreq.dStereoL[x];
 		    }
-		    if (car->wav.wavSampleBufferFreq.dStereoR[x] > g_max_amp[x])
+		    if (car->wav.wavSampleBufferFreq.dStereoR[x] > car->max_amp[x])
 		    {
-		        g_max_amp[x] = car->wav.wavSampleBufferFreq.dStereoR[x];
+		        car->max_amp[x] = car->wav.wavSampleBufferFreq.dStereoR[x];
 		    }
 		}
-		car->wav.wavReadConfig.u32FileSeekPosL += (car->wav.wavReadConfig.u32Offset * 44100);
-		car->wav.wavReadConfig.u32FileSeekPosR += (car->wav.wavReadConfig.u32Offset * 44100);
+		car->wav.wavReadConfig.u32FileSeekPosL -= (car->wav.wavReadConfig.u32Offset * (44100 - 4410));
+		car->wav.wavReadConfig.u32FileSeekPosR -= (car->wav.wavReadConfig.u32Offset * (44100 - 4410));
+		// car->wav.wavReadConfig.u32FileSeekPosL += (car->wav.wavReadConfig.u32Offset * 44100);
+		// car->wav.wavReadConfig.u32FileSeekPosR += (car->wav.wavReadConfig.u32Offset * 44100);
 		//total_samples += 44100;
 	}
-	car->wav.wavReadConfig.u32FileSeekPosL = 45;
-	car->wav.wavReadConfig.u32FileSeekPosR = 47;
 	// for (int x=0; x < 150; x++)
 		//printf("freq %d max: %f\n", x, g_max_amp[x]);
+	printf("loops: %ld\n", i);
 	printf("done\n");
 	// exit(0);
 }

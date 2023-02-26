@@ -120,8 +120,7 @@ typedef struct sWavReadConfig
     uint32_t u32Idx;
     uint32_t u32Offset;
     uint8_t  u8ByteCnt;
-    uint8_t  u8NumOfChannel;
-    
+    uint8_t  u8NumOfChannel;   
 }   tstWavReadConfig;
 
 

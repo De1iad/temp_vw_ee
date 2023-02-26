@@ -6,7 +6,7 @@
 /*   By: obibby <obibby@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/27 16:03:35 by obibby            #+#    #+#             */
-/*   Updated: 2023/02/26 02:18:20 by obibby           ###   ########.fr       */
+/*   Updated: 2023/02/26 17:36:02 by obibby           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,7 @@ typedef struct s_car
 	time_t	previous_time;
 	time_t	loop_time;
 	t_wav	wav;
+	double max_amp[22050];
 } t_car;
 
 
