@@ -28,7 +28,8 @@ tenWavLibReturnCode WAVLIB_ReadByteFromStream(FILE *fWavStream,
             //printf("Bytecntdown: %d; data: %d\n", u8ByteCnt, *pu32SpecData);
             *((uint32_t *)pu32SpecData) <<= WAVLIB_BYTE_BITS;
             fseek(fWavStream, u32Pos, SEEK_SET);
-            fread((void *)&(u8ByteData), WAVLIB_ONE_BYTE, sizeof(uint8_t), fWavStream);
+            if (!fread((void *)&(u8ByteData), WAVLIB_ONE_BYTE, sizeof(uint8_t), fWavStream))
+				return (WAVLIB_EOF);
             u8ByteCnt--;
             u32Pos--;
             *((uint32_t *)pu32SpecData) |= (u8ByteData & 0x000000FF);

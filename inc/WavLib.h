@@ -25,12 +25,28 @@
 
 struct s_car;
 
+typedef struct s_light_freqs
+{
+	uint16_t	Front_Lights;
+	uint16_t	Parking_Lights;
+	uint16_t	Blink_Lights;
+	uint16_t	Brake_Lights;
+	uint16_t	Reverse_Lights;
+	uint16_t	Ambient_Lights;
+	uint16_t	Fog_Lights;
+	uint16_t	License_Light1;
+	uint16_t	License_Light2;
+	uint16_t	License_Light3;
+	uint16_t	License_Light4;
+	uint16_t	License_Light5;
+} t_light_freqs;
+
 typedef enum enWavLibReturnCode
 {
     WAVLIB_ERR_FILE_OPEN = -127,
     WAVLIB_ERR_NULL_PTR,
     WAVLIB_ERR_STEREO_MUL_CHAN,   // Stereo Wav file with more than two channels
-
+	WAVLIB_EOF,
     WAVLIB_SUCCESS = 0,
 
 }   tenWavLibReturnCode;

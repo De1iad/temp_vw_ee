@@ -6,7 +6,7 @@
 /*   By: obibby <obibby@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/27 16:03:35 by obibby            #+#    #+#             */
-/*   Updated: 2023/02/25 13:23:13 by obibby           ###   ########.fr       */
+/*   Updated: 2023/02/25 23:40:57 by obibby           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,7 @@ char	*ft_itoa(int n);
 void	main_lights(t_car *car);
 void	fog_lights(t_car *car);
 void	indicators(t_car *car);
+void	interior(t_car *car);
 void	parking_lights(t_car *car);
 void	brake_lights(t_car *car);
 void	license_plate(t_car *car);

@@ -6,14 +6,14 @@
 #    By: obibby <obibby@student.42wolfsburg.de>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/01/06 20:17:58 by libacchu          #+#    #+#              #
-#    Updated: 2023/02/25 16:35:59 by obibby           ###   ########.fr        #
+#    Updated: 2023/02/25 23:40:45 by obibby           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME	=	car_demo
 OBJ_DIR =	obj/
 SRC_DIR =	src/
-SRC		=	main.c EasterEgg.c image.c utils.c lights_main.c lights_fog.c lights_indicator.c lights_parking.c lights_brake.c lights_license.c WavLib.c TimeLib.c transform.c FftLib.c PlaySong.c
+SRC		=	main.c EasterEgg.c image.c utils.c lights_main.c lights_fog.c lights_indicator.c lights_interior.c lights_parking.c lights_brake.c lights_license.c WavLib.c TimeLib.c transform.c FftLib.c PlaySong.c
 INC		=	inc/car.h inc/EasterEgg.h
 SYS		=	$(shell uname -s)
 ifeq ($(SYS), Linux)

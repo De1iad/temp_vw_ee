@@ -44,10 +44,11 @@ int	light_loop(t_car *car)
 	{	
 		//EasterEgg_Cyclic_10ms();
 		brake_lights(car);
+		indicators(car);
 		main_lights(car);
 		fog_lights(car);
 		parking_lights(car);
-		indicators(car);
+		interior(car);
 		license_plate(car);
 		mlx_put_image_to_window(car->mlx, car->window, car->image.img, 0, 0);
 		mlx_put_image_to_window(car->mlx, car->window, car->alpha_image.img, 0, 0);
