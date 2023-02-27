@@ -7,6 +7,7 @@
 /* ********************************************************************** */
 
 #include "../inc/PlaySong.h"
+#include "../inc/car.h"
 
 void    MyAudioCallBack(void *userData, uint8_t *stream, int streamLength)
 {
@@ -22,14 +23,16 @@ void    MyAudioCallBack(void *userData, uint8_t *stream, int streamLength)
     audio->length -= length;
 }
 
-void    *playSong(void *args)
+void    *playSong(void *time_void)
 {
 	SDL_Init(SDL_INIT_AUDIO);
-	printf("\nPlaying %s: %s", NAME_SONG, (char *)args);
+	//printf("\nPlaying %s: %s", NAME_SONG, (char *)args);
     
     SDL_AudioSpec   wavSpec;
     uint8_t         *wavStart;
     uint32_t        wavLength;
+	time_t			*previous_time = time_void;
+	time_t			current_time = get_time_in_ms();
 
     /* Load sound */
     if (SDL_LoadWAV(WAVE_FILE_PATH, &wavSpec, &wavStart, &wavLength) == NULL)
@@ -55,7 +58,11 @@ void    *playSong(void *args)
         write(STDERROR, SDL_GetError(), strlen(SDL_GetError()));
         return (NULL);
     }
-
+	while (current_time - *previous_time < 50000)
+	{
+		current_time = get_time_in_ms();
+	}
+	printf("song current_time: %ld, prev_time: %ld\n", current_time, *previous_time);
     /* play sound */
     SDL_PauseAudioDevice(audioDevice, 0);
     

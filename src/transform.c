@@ -9,16 +9,15 @@
 
 #include "../inc/car.h"
 #include "../inc/WavLib.h"
-//#include "../inc/TimeLib.h"
 #include "../inc/EasterEgg.h"
 #ifdef DEBUG
 # include "../inc/PlaySong.h"
 #endif
-# define WAVFILE ("./Quantumania.wav")
+# define WAVFILE ("./quantumania.wav")
 
 inputsEE EasterEggLightsEE;
 
-//double g_max_amp[22050];
+double **get_averages(tstSampleBufferDouble *sample_freqs);
 
 void	manual_assign_freqs(t_light_freqs *freqs)
 {
@@ -45,7 +44,6 @@ void	auto_assign_freqs(t_light_freqs *freqs, double *max_amp)
 		{
 			freqs->Front_Lights = i;
 			magnitude = max_amp[i];
-			//break ;
 		}
 	}
 	printf("front lights: %dhz\n", freqs->Front_Lights);
@@ -111,16 +109,16 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 	// 	printf("freq range %d-%d: %f\n", i * 8, (i + 1) * 8, averages[0][i]);
 	// free(averages);
 
-	//printf("%f / 7 = %f, current freq L: %f, current freq R: %f\n", g_max_amp[93], g_max_amp[93] / 7, sample_freqs->dStereoL[93], sample_freqs->dStereoR[93]);
+	//printf("%f / 7 = %f, current freq L: %f, current freq R: %f\n", max_amp[freqs->Front_Lights], max_amp[freqs->Front_Lights] / 7, sample_freqs->dStereoL[freqs->Front_Lights], sample_freqs->dStereoR[freqs->Front_Lights]);
 	printf("timestamp: %ld\n", get_time_in_ms());
 	for (int i = 0; i < 22050; i++)
 	{
-		if ((sample_freqs->dStereoL[i] > 400) || (sample_freqs->dStereoR[i] > 400))
+		if ((sample_freqs->dStereoL[i] > 1000) || (sample_freqs->dStereoR[i] > 1000))
 			printf("freq %d, left: %f, right: %f, max_amp: %f\n", i, sample_freqs->dStereoL[i], sample_freqs->dStereoR[i], max_amp[i]);
 	}
 
 	// headlights
-	if (sample_freqs->dStereoL[freqs->Front_Lights] > max_amp[freqs->Front_Lights] / 3 || sample_freqs->dStereoR[freqs->Front_Lights] > max_amp[freqs->Front_Lights] / 3) //old: sample_freqs->dStereoL[93] > max_amp[93] / 7 || sample_freqs->dStereoR[93] > max_amp[93] / 7
+	if (sample_freqs->dStereoL[freqs->Front_Lights] > max_amp[freqs->Front_Lights] / 3 || sample_freqs->dStereoR[freqs->Front_Lights] > max_amp[freqs->Front_Lights] / 3)
 	{
 		EasterEggLightsEE.FrontLights = 1;
 	}
@@ -128,7 +126,7 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 		EasterEggLightsEE.FrontLights = 0;
 
 	// fog lights
-	if (sample_freqs->dStereoL[freqs->Fog_Lights] > max_amp[freqs->Fog_Lights] / 7) // old: sample_freqs->dStereoL[44] > max_amp[44] / 7
+	if (sample_freqs->dStereoL[freqs->Fog_Lights] > max_amp[freqs->Fog_Lights] / 7)
 	{
 		EasterEggLightsEE.FogLights = 1;
 		EasterEggLightsEE.FogLightsPWM = 1000 * (sample_freqs->dStereoL[freqs->Fog_Lights] / max_amp[freqs->Fog_Lights]);
@@ -184,15 +182,15 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 	}
 
 	// brake lights
-	if (sample_freqs->dStereoL[556] > max_amp[556] / 7)
+	if (sample_freqs->dStereoL[2365] > max_amp[2365] / 5) //556
 	{
 		EasterEggLightsEE.BrakeLights = 1;
-		EasterEggLightsEE.BrakeLightsPWM = 1000 * (sample_freqs->dStereoL[556] / max_amp[556]);
+		EasterEggLightsEE.BrakeLightsPWM = 1000 * (sample_freqs->dStereoL[2365] / max_amp[2365]);
 	}
-	else if (sample_freqs->dStereoR[1109] > max_amp[1109] / 7)
+	else if (sample_freqs->dStereoR[2365] > max_amp[2365] / 5)
 	{
 		EasterEggLightsEE.BrakeLights = 1;
-		EasterEggLightsEE.BrakeLightsPWM = 1000 * (sample_freqs->dStereoR[1109] > max_amp[1109]);
+		EasterEggLightsEE.BrakeLightsPWM = 1000 * (sample_freqs->dStereoR[2365] > max_amp[2365]);
 	}
 	else
 		EasterEggLightsEE.BrakeLights = 0;
@@ -281,21 +279,28 @@ void	*transform_loop(void *car_void)
 	time_t			current_time;
 	time_t			previous_time;
 	time_t			change_in_time;
+	time_t			linked_time;
 	double			change_in_pos;
 	t_light_freqs	freqs;
 	pthread_t		pxThreadPlaySong;
 
+	linked_time = car->previous_time;
 	//manual_assign_freqs(&freqs);
 	auto_assign_freqs(&freqs, car->max_amp);
+	fseek(car->wav.wavStream, car->wav.wavReadConfig.u32FileSeekPosL, SEEK_SET);
+	current_time = get_time_in_ms();
 	#ifdef DEBUG
-	if (pthread_create(&pxThreadPlaySong, NULL, playSong, "DEBUG") != 0)
+	if (pthread_create(&pxThreadPlaySong, NULL, playSong, &linked_time) != 0)
 	{
 		printf("Error! pthread_create.\n");
 		return (NULL);
 	}
     #endif
-	sleep(1);
-	fseek(car->wav.wavStream, car->wav.wavReadConfig.u32FileSeekPosL, SEEK_SET);
+	while (current_time - linked_time < 50000)
+	{
+		current_time = get_time_in_ms();
+	}
+	printf("trans current_time: %ld, prev_time: %ld\n", current_time, linked_time);
 	previous_time = get_time_in_ms();    
 	while (1)
 	{  
@@ -439,14 +444,14 @@ void fetch_amp_range(t_car *car)
 		}
 		car->wav.wavReadConfig.u32FileSeekPosL -= (car->wav.wavReadConfig.u32Offset * (44100 - 4410));
 		car->wav.wavReadConfig.u32FileSeekPosR -= (car->wav.wavReadConfig.u32Offset * (44100 - 4410));
-		// car->wav.wavReadConfig.u32FileSeekPosL += (car->wav.wavReadConfig.u32Offset * 44100);
-		// car->wav.wavReadConfig.u32FileSeekPosR += (car->wav.wavReadConfig.u32Offset * 44100);
-		//total_samples += 44100;
 	}
-	// for (int x=0; x < 150; x++)
-		//printf("freq %d max: %f\n", x, g_max_amp[x]);
 	printf("loops: %ld\n", i);
 	printf("done\n");
+	// for (int x=0; x < 22050; x++)
+	// {
+	// 	if (car->max_amp[x] > 200)
+	// 		printf("freq %d max: %f\n", x, car->max_amp[x]);
+	// }
 	// exit(0);
 }
 

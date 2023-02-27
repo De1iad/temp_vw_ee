@@ -6,7 +6,7 @@
 /*   By: obibby <obibby@student.42wolfsburg.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/27 16:03:35 by obibby            #+#    #+#             */
-/*   Updated: 2023/02/26 17:36:02 by obibby           ###   ########.fr       */
+/*   Updated: 2023/02/26 21:35:15 by obibby           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,6 @@
 #endif
 
 extern inputsEE EasterEggLightsEE;
-//extern	double g_max_amp[22050];
 
 typedef struct s_wav t_wav;
 
