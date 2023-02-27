@@ -13,7 +13,7 @@
 #ifdef DEBUG
 # include "../inc/PlaySong.h"
 #endif
-# define WAVFILE ("./quantumania.wav")
+# define WAVFILE ("./encore.wav")
 
 inputsEE EasterEggLightsEE;
 
@@ -118,7 +118,7 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 	}
 
 	// headlights
-	if (sample_freqs->dStereoL[freqs->Front_Lights] > max_amp[freqs->Front_Lights] / 3 || sample_freqs->dStereoR[freqs->Front_Lights] > max_amp[freqs->Front_Lights] / 3)
+	if (sample_freqs->dStereoL[freqs->Front_Lights] > max_amp[freqs->Front_Lights] / 3 || sample_freqs->dStereoR[freqs->Front_Lights] > max_amp[freqs->Front_Lights] / 3 ||  sample_freqs->dStereoL[622] > max_amp[622] / 3 || sample_freqs->dStereoR[622] > max_amp[622] / 3)
 	{
 		EasterEggLightsEE.FrontLights = 1;
 	}
@@ -174,6 +174,20 @@ void	set_light_variables(tstSampleBufferDouble *sample_freqs, t_light_freqs *fre
 		EasterEggLightsEE.BlinkLightLeftPWM = 1000 * (sample_freqs->dStereoR[freqs->Blink_Lights] / max_amp[freqs->Blink_Lights]);
 		EasterEggLightsEE.BlinkLightRight = 1;
 		EasterEggLightsEE.BlinkLightRightPWM = 1000 * (sample_freqs->dStereoR[freqs->Blink_Lights] / max_amp[freqs->Blink_Lights]);
+	}
+	else if (sample_freqs->dStereoL[700] > max_amp[700] / 5)
+	{
+		EasterEggLightsEE.BlinkLightLeft = 1;
+		EasterEggLightsEE.BlinkLightLeftPWM = 1000 * (sample_freqs->dStereoL[700] / max_amp[700]);
+		EasterEggLightsEE.BlinkLightRight = 1;
+		EasterEggLightsEE.BlinkLightRightPWM = 1000 * (sample_freqs->dStereoL[700] / max_amp[700]);
+	}
+	else if (sample_freqs->dStereoR[700] > max_amp[700] / 5)
+	{
+		EasterEggLightsEE.BlinkLightLeft = 1;
+		EasterEggLightsEE.BlinkLightLeftPWM = 1000 * (sample_freqs->dStereoR[700] / max_amp[700]);
+		EasterEggLightsEE.BlinkLightRight = 1;
+		EasterEggLightsEE.BlinkLightRightPWM = 1000 * (sample_freqs->dStereoR[700] / max_amp[700]);
 	}
 	else
 	{

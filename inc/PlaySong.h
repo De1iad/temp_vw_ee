@@ -15,7 +15,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#define WAVE_FILE_PATH ("./quantumania.wav")
+#define WAVE_FILE_PATH ("./encore.wav")
 #define ERR_FILE_LOAD_FAIL ("Error: Failed to load file\n")
 #define NAME_SONG ("Numb Encore by JayZ and Linkin-Park\n")
 #define STDERROR (2)
