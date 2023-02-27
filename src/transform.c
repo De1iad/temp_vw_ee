@@ -13,7 +13,7 @@
 #ifdef DEBUG
 # include "../inc/PlaySong.h"
 #endif
-# define WAVFILE ("./encore.wav")
+# define WAVFILE ("./quantumania.wav")
 
 inputsEE EasterEggLightsEE;
 
